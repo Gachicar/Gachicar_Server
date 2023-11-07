@@ -2,23 +2,34 @@ package gachicar.gachicarserver.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+
+import org.springframework.messaging.simp.config.ChannelRegistration;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.config.annotation.*;
+import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
 @Configuration
-@EnableWebSocket
+@EnableWebSocketMessageBroker
 @RequiredArgsConstructor
-public class WebSocketConfig implements WebSocketConfigurer {
-
-    private final WebSocketHandler webSocketHandler;
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        // endpoint 설정: /api/drive/{carId}
-        // 이를 통해서 ws://localhost:9090/ws/drive 으로 요청이 들어오면 websocket 통신을 진행한다.
-        // setAllowedOrigins("*")는 모든 ip에서 접속 가능하도록 해줌.
-        registry.addHandler(webSocketHandler, "/ws/drive").setAllowedOrigins("*"); // * : 허용 도메인 지정(테스트 시에만 * 사용)
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // WebSocket 엔드포인트 설정
+        registry.addEndpoint("/ws/carSharing")
+                .addInterceptors(new HttpSessionHandshakeInterceptor())
+                .setAllowedOriginPatterns("*");
     }
+
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+        registry.enableSimpleBroker("/sub", "/queue");
+        registry.setApplicationDestinationPrefixes("/pub"); // 클라이언트가 메시지를 보낼 때 경로 맨 앞에 "/pub"이 붙어있으면 Broker로 보내짐.
+    }
+
+    /* 메시지가 Connection을 맺을 때 header에서 user 정보를 뽑고 session에 저장해주기 */
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+    }
+
 }
