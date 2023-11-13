@@ -1,8 +1,10 @@
-pring:
+server:
+  port: 9090
+spring:
   datasource:
-    url: jdbc:h2:tcp://localhost/~/gachicarserver
+    url: jdbc:h2:tcp://localhost/~/gachicar
     username: sa
-    password: 1234
+    password:
     driver-class-name: org.h2.Driver
   jpa:
     hibernate:
