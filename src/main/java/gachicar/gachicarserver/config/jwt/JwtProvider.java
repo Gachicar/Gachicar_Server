@@ -31,7 +31,7 @@
         private String key;
         private Key secretKey;
 
-        private static final Long accessTokenValidationTime = 30 * 60 * 1000L;   //30분
+        private static final Long accessTokenValidationTime = 60 * 60 * 1000L;   //60분
 
         private final UserRepository userRepository;
         private final RefreshTokenRepository refreshTokenRepository;
@@ -79,7 +79,6 @@
         public String reAccessToken(String token) {
 
             RefreshToken refreshToken = refreshTokenRepository.findById(token);
-
             Long userId = refreshToken.getUserId();
             User user = userRepository.findOne(userId);
 
