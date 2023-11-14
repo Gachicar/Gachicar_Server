@@ -5,6 +5,7 @@ import gachicar.gachicarserver.domain.RefreshToken;
 import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.AuthErrorStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -18,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class RefreshTokenRepository {
 
+    @Autowired
     private RedisTemplate<String, Long> redisTemplate;
 
     public RefreshTokenRepository(RedisTemplate<String, Long> redisTemplate) {
