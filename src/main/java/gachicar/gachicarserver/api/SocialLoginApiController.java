@@ -63,7 +63,7 @@ public class SocialLoginApiController {
     /**
      * 액세스 토큰 재발급 요청
      */
-    @GetMapping("/api/auth/getnewtoken")
+    @GetMapping("/api/auth/newToken")
     public ResultDto<Object> getNewToken(@RequestHeader HttpHeaders headers) {
         try {
             String refreshToken = Objects.requireNonNull(headers.getFirst("Authorization")).substring(7);

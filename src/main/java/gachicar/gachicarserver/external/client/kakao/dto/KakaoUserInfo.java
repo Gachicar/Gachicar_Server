@@ -11,14 +11,16 @@ public class KakaoUserInfo {
     private Long id;
     private String name;
     private Map<String, Object> kakao_account;
-    private Map<String, Object> profile;
+    private Map<String, Object> properties;
+    private String profile_image;
     private String email;
 
     public KakaoUserInfo(Map<String, Object> attributes) {
         this.id = (Long) attributes.get("id");
+        this.properties = (Map<String, Object>) attributes.get("properties");
+        this.name = (String) properties.get("nickname");
+        this.profile_image = (String) properties.get("profile_image");
         this.kakao_account = (Map<String, Object>) attributes.get("kakao_account");
-        this.profile = (Map<String, Object>) kakao_account.get("profile");
-        this.name = (String) profile.get("nickname");
         this.email = (String) kakao_account.get("email");
     }
 }
