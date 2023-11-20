@@ -3,7 +3,7 @@ package gachicar.gachicarserver.service;
 import gachicar.gachicarserver.domain.Group;
 import gachicar.gachicarserver.domain.Role;
 import gachicar.gachicarserver.domain.User;
-import gachicar.gachicarserver.dto.UpdateUserNicknameRequestDto;
+import gachicar.gachicarserver.dto.requestDto.UpdateUserNicknameRequestDto;
 import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.AuthErrorStatus;
 import gachicar.gachicarserver.repository.UserRepository;

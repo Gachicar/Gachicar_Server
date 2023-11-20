@@ -1,4 +1,4 @@
-package gachicar.gachicarserver.dto;
+package gachicar.gachicarserver.dto.requestDto;
 
 import lombok.Data;
 

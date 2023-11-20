@@ -4,7 +4,7 @@ package gachicar.gachicarserver.api;
 import gachicar.gachicarserver.config.jwt.CustomUserDetail;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.ResultDto;
-import gachicar.gachicarserver.dto.UpdateUserNicknameRequestDto;
+import gachicar.gachicarserver.dto.requestDto.UpdateUserNicknameRequestDto;
 import gachicar.gachicarserver.dto.UserDto;
 import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.HttpStatusCode;
