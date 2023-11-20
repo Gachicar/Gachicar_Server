@@ -25,4 +25,8 @@ public class GroupService {
         groupRepository.save(newGroup);
         return newGroup;
     }
+
+    public GroupDto getUserGroup(User user) {
+        return new GroupDto(user.getGroup());
+    }
 }
