@@ -28,6 +28,9 @@ public class GroupApiController {
     public final UserService userService;
     public final GroupService groupService;
 
+    /**
+     * 그룹 생성
+     */
     @PostMapping
     public ResultDto<Object> createGroup(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody CreateGroupRequestDto requestDto) {
         try {
