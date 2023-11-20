@@ -1,7 +1,10 @@
 package gachicar.gachicarserver.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -22,9 +25,18 @@ public class Group {
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     private List<User> memberList = new ArrayList<>();
 
-    private Long managerId; // 그룹장 아이디
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id")
+    private User manager; // 그룹장
 
     @OneToOne
     @JoinColumn(name = "car_id")
     private Car car;
+
+    @Builder
+    public Group(String name, String desc, User manager) {
+        this.name = name;
+        this.desc = desc;
+        this.manager = manager;
+    }
 }

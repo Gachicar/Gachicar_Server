@@ -1,5 +1,7 @@
 package gachicar.gachicarserver.service;
 
+import gachicar.gachicarserver.domain.Group;
+import gachicar.gachicarserver.domain.Role;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.UpdateUserNicknameRequestDto;
 import gachicar.gachicarserver.exception.AuthErrorException;
@@ -43,5 +45,12 @@ public class UserService {
     public void delete(Long userId) {
         User user = userRepository.findOne(userId);
         userRepository.delete(user);
+    }
+
+    @Transactional
+    /* 그룹 변경 */
+    public void updateGroup(User user, Group group) {
+        user.setGroup(group);
+        user.setRole(Role.MANAGER);
     }
 }

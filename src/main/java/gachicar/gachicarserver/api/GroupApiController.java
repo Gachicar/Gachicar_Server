@@ -1,0 +1,44 @@
+package gachicar.gachicarserver.api;
+
+import gachicar.gachicarserver.config.jwt.CustomUserDetail;
+import gachicar.gachicarserver.domain.Group;
+import gachicar.gachicarserver.domain.User;
+import gachicar.gachicarserver.dto.ResultDto;
+import gachicar.gachicarserver.dto.requestDto.CreateGroupRequestDto;
+import gachicar.gachicarserver.exception.AuthErrorException;
+import gachicar.gachicarserver.exception.HttpStatusCode;
+import gachicar.gachicarserver.service.GroupService;
+import gachicar.gachicarserver.service.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * 그룹(가족) 관련 Api
+ * - 그룹 생성/조회/수정/삭제
+ */
+@Slf4j
+@RestController
+@RequestMapping("/api/group")
+@RequiredArgsConstructor
+public class GroupApiController {
+
+    public final UserService userService;
+    public final GroupService groupService;
+
+    @PostMapping
+    public ResultDto<Object> createGroup(@AuthenticationPrincipal CustomUserDetail userDetail, CreateGroupRequestDto requestDto) {
+        try {
+            User user = userService.findUserById(userDetail.getId());
+            Group group = groupService.createGroup(requestDto, user);
+            userService.updateGroup(user, group);
+
+            return ResultDto.of(HttpStatusCode.CREATED, "그룹 생성 성공", null);
+        } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        }
+    }
+}
