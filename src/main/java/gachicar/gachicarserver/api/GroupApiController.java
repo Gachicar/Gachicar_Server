@@ -112,7 +112,8 @@ public class GroupApiController {
     public ResultDto<Object> deleteGroup(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody DeleteGroupRequestDto requestDto) {
         try {
             User user = userService.findUserById(userDetail.getId());
-            groupService.deleteGroup(user, requestDto);
+            userService.deleteGroup(user, requestDto);
+            groupService.deleteGroup(requestDto);
 
             return ResultDto.of(HttpStatusCode.OK, "그룹 삭제 성공", null);
         } catch (AuthErrorException e) {

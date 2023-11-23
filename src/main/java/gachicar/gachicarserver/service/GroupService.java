@@ -66,21 +66,8 @@ public class GroupService {
 
     /* 그룹 자체를 삭제 (그룹장만 가능) */
     @Transactional
-    public void deleteGroup(User user, DeleteGroupRequestDto requestDto) {
-        Group group = user.getGroup();
-
-        if (group != null) {
-            if (Objects.equals(group.getGroupId(), requestDto.getDeleteId())) {
-                // 사용자가 그룹장인지 확인
-                if (group.getManager() == user) {
-                    groupRepository.delete(group);
-                } else {
-                    throw new ApiErrorException(ApiErrorStatus.NOT_MANAGER);
-                }
-            }
-        } else {
-            throw new ApiErrorException(ApiErrorStatus.NOT_HAVE_GROUP);
-        }
-
+    public void deleteGroup(DeleteGroupRequestDto requestDto) {
+        Group group = groupRepository.findById(requestDto.getDeleteId());
+        groupRepository.delete(group);
     }
 }
