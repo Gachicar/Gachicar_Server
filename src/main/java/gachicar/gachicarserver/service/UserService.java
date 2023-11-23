@@ -64,15 +64,18 @@ public class UserService {
         Group group = user.getGroup();
 
         if (group != null) {
-            if (Objects.equals(group.getGroupId(), requestDto.getDeleteId())) {
-                // 사용자가 그룹장인지 확인
-                if (group.getManager() == user) {
-                    user.setRole(Role.USER);
-                    user.setGroup(null);
-                } else {
-                    throw new ApiErrorException(ApiErrorStatus.NOT_MANAGER);
+            if (requestDto.getDeleteId() != null) {
+                if (Objects.equals(group.getGroupId(), requestDto.getDeleteId())) {
+                    // 사용자가 그룹장인지 확인
+                    if (group.getManager() == user) {
+                        user.setRole(Role.USER);
+                        user.setGroup(null);
+                    } else {
+                        throw new ApiErrorException(ApiErrorStatus.NOT_MANAGER);
+                    }
                 }
-            }
+            } else
+                throw new ApiErrorException(ApiErrorStatus.MALFORMED);
         } else {
             throw new ApiErrorException(ApiErrorStatus.NOT_HAVE_GROUP);
         }
