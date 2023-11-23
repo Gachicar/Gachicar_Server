@@ -6,6 +6,8 @@ import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.GroupDto;
 import gachicar.gachicarserver.dto.ResultDto;
 import gachicar.gachicarserver.dto.requestDto.CreateGroupRequestDto;
+import gachicar.gachicarserver.dto.requestDto.UpdateGroupNameRequestDto;
+import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.HttpStatusCode;
 import gachicar.gachicarserver.service.GroupService;
@@ -57,6 +59,25 @@ public class GroupApiController {
 
             return ResultDto.of(HttpStatusCode.OK, "그룹 정보 조회 성공", groupDto);
         } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (Exception e) {
+            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
+        }
+    }
+
+    /**
+     * 그룹 닉네임 수정
+     */
+    @PatchMapping("/updateName")
+    public ResultDto<Object> updateGroupName(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody UpdateGroupNameRequestDto requestDto) {
+        try {
+            User user = userService.findUserById(userDetail.getId());
+            groupService.updateGroupName(user, requestDto);
+
+            return ResultDto.of(HttpStatusCode.OK, "그룹 닉네임 수정 성공", null);
+        } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
