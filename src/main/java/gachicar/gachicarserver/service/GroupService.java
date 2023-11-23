@@ -4,14 +4,18 @@ import gachicar.gachicarserver.domain.Group;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.GroupDto;
 import gachicar.gachicarserver.dto.requestDto.CreateGroupRequestDto;
+import gachicar.gachicarserver.dto.requestDto.DeleteGroupRequestDto;
 import gachicar.gachicarserver.dto.requestDto.UpdateGroupDescRequestDto;
 import gachicar.gachicarserver.dto.requestDto.UpdateGroupNameRequestDto;
 import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.ApiErrorStatus;
+import gachicar.gachicarserver.exception.ApiErrorWithItemException;
 import gachicar.gachicarserver.repository.GroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -62,14 +66,21 @@ public class GroupService {
 
     /* 그룹 자체를 삭제 (그룹장만 가능) */
     @Transactional
-    public void deleteGroup(User user) {
+    public void deleteGroup(User user, DeleteGroupRequestDto requestDto) {
         Group group = user.getGroup();
 
-        // 사용자가 그룹장인지 확인
-        if (group.getManager() == user) {
-            groupRepository.delete(group);
+        if (group != null) {
+            if (Objects.equals(group.getGroupId(), requestDto.getDeleteId())) {
+                // 사용자가 그룹장인지 확인
+                if (group.getManager() == user) {
+                    groupRepository.delete(group);
+                } else {
+                    throw new ApiErrorException(ApiErrorStatus.NOT_MANAGER);
+                }
+            }
         } else {
-            throw new ApiErrorException(ApiErrorStatus.NOT_MANAGER);
+            throw new ApiErrorException(ApiErrorStatus.NOT_HAVE_GROUP);
         }
+
     }
 }

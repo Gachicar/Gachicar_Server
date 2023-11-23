@@ -6,6 +6,7 @@ import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.GroupDto;
 import gachicar.gachicarserver.dto.ResultDto;
 import gachicar.gachicarserver.dto.requestDto.CreateGroupRequestDto;
+import gachicar.gachicarserver.dto.requestDto.DeleteGroupRequestDto;
 import gachicar.gachicarserver.dto.requestDto.UpdateGroupDescRequestDto;
 import gachicar.gachicarserver.dto.requestDto.UpdateGroupNameRequestDto;
 import gachicar.gachicarserver.exception.ApiErrorException;
@@ -108,10 +109,10 @@ public class GroupApiController {
      * 그룹 삭제
      */
     @DeleteMapping
-    public ResultDto<Object> deleteGroup(@AuthenticationPrincipal CustomUserDetail userDetail) {
+    public ResultDto<Object> deleteGroup(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody DeleteGroupRequestDto requestDto) {
         try {
             User user = userService.findUserById(userDetail.getId());
-            groupService.deleteGroup(user);
+            groupService.deleteGroup(user, requestDto);
 
             return ResultDto.of(HttpStatusCode.OK, "그룹 삭제 성공", null);
         } catch (AuthErrorException e) {
