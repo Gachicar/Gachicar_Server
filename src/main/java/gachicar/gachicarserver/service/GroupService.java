@@ -4,6 +4,7 @@ import gachicar.gachicarserver.domain.Group;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.GroupDto;
 import gachicar.gachicarserver.dto.requestDto.CreateGroupRequestDto;
+import gachicar.gachicarserver.dto.requestDto.UpdateGroupDescRequestDto;
 import gachicar.gachicarserver.dto.requestDto.UpdateGroupNameRequestDto;
 import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.ApiErrorStatus;
@@ -41,6 +42,19 @@ public class GroupService {
         // 사용자가 그룹장인지 확인
         if (group.getManager() == user) {
             group.setName(requestDto.getNewGroupName());
+        } else {
+            throw new ApiErrorException(ApiErrorStatus.NOT_MANAGER);
+        }
+    }
+
+    /* 그룹 한줄소개 수정 */
+    @Transactional
+    public void updateGroupDesc(User user, UpdateGroupDescRequestDto requestDto) {
+        Group group = user.getGroup();
+
+        // 사용자가 그룹장인지 확인
+        if (group.getManager() == user) {
+            group.setName(requestDto.getNewDesc());
         } else {
             throw new ApiErrorException(ApiErrorStatus.NOT_MANAGER);
         }
