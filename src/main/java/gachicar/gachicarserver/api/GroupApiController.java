@@ -103,4 +103,23 @@ public class GroupApiController {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
         }
     }
+
+    /**
+     * 그룹 삭제
+     */
+    @DeleteMapping
+    public ResultDto<Object> deleteGroup(@AuthenticationPrincipal CustomUserDetail userDetail) {
+        try {
+            User user = userService.findUserById(userDetail.getId());
+            groupService.deleteGroup(user);
+
+            return ResultDto.of(HttpStatusCode.OK, "그룹 삭제 성공", null);
+        } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (Exception e) {
+            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
+        }
+    }
 }

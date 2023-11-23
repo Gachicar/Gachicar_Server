@@ -21,4 +21,8 @@ public class GroupRepository {
     public Group findById(Long groupId) {
         return em.find(Group.class, groupId);
     }
+
+    public void delete(Group group) {
+        em.remove(group);
+    }
 }

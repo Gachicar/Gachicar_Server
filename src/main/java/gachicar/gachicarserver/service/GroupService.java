@@ -59,4 +59,17 @@ public class GroupService {
             throw new ApiErrorException(ApiErrorStatus.NOT_MANAGER);
         }
     }
+
+    /* 그룹 자체를 삭제 (그룹장만 가능) */
+    @Transactional
+    public void deleteGroup(User user) {
+        Group group = user.getGroup();
+
+        // 사용자가 그룹장인지 확인
+        if (group.getManager() == user) {
+            groupRepository.delete(group);
+        } else {
+            throw new ApiErrorException(ApiErrorStatus.NOT_MANAGER);
+        }
+    }
 }
