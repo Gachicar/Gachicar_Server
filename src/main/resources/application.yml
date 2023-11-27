@@ -1,5 +1,16 @@
 server:
   port: 9090
+  undertow:
+    # HTTP 설정
+    http2:
+      enabled: true # HTTP/2 지원 여부
+    direct-buffers: true # 다이렉트 버퍼 사용 여부
+    buffer-size: 1024 # 버퍼 크기
+
+    websocket:
+      direct-buffers: true
+      buffer-size: 1024
+
 spring:
   datasource:
     url: jdbc:h2:tcp://localhost/~/gachicar

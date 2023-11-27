@@ -1,7 +1,6 @@
 package gachicar.gachicarserver.domain;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -10,21 +9,32 @@ import java.util.List;
 @Entity
 @Getter
 @Table(name="Group_table")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long groupId;
 
+    @Setter
     private String name;
+    @Setter
     private String desc;
 
-    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "group")
     private List<User> memberList = new ArrayList<>();
 
-    private Long managerId; // 그룹장 아이디
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id")
+    private User manager; // 그룹장
 
     @OneToOne
     @JoinColumn(name = "car_id")
     private Car car;
+
+    @Builder
+    public Group(String name, String desc, User manager) {
+        this.name = name;
+        this.desc = desc;
+        this.manager = manager;
+    }
 }

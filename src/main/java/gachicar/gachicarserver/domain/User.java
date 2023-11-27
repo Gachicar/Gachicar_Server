@@ -19,12 +19,15 @@ public class User {
 
     private String email;
 
+    // 내가 속한 그룹
+    @Setter
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
     private Group group;
 
     // 사용자 권한
+    @Setter
     @Enumerated(EnumType.STRING)
     private Role role;
 
