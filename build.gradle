@@ -15,7 +15,12 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+용	configureEach {
+		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'	// tomcat 제외
+	}
 }
+
+
 
 repositories {
 	mavenCentral()
@@ -27,6 +32,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.webjars:sockjs-client'
 	implementation 'org.webjars:stomp-websocket'
+	implementation 'org.springframework.boot:spring-boot-starter-undertow'	// undertow
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	annotationProcessor 'org.projectlombok:lombok'
