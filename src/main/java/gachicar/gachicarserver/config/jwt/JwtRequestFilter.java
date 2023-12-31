@@ -59,6 +59,5 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             return token.substring(7);  // "Bearer "를 제외한 토큰 값
         }
         return null;
-
     }
 }
