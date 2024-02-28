@@ -4,7 +4,7 @@ import gachicar.gachicarserver.config.jwt.CustomUserDetail;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.ResultDto;
-import gachicar.gachicarserver.dto.requestDto.CreateCarRequestDto;
+import gachicar.gachicarserver.dto.CarDto;
 import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.HttpStatusCode;
 import gachicar.gachicarserver.service.CarService;
@@ -12,10 +12,7 @@ import gachicar.gachicarserver.service.GroupService;
 import gachicar.gachicarserver.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/car")
@@ -27,7 +24,7 @@ public class CarApiController {
     public final CarService carService;
 
     @PostMapping
-    public ResultDto<Object> createCar(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody CreateCarRequestDto carRequestDto) {
+    public ResultDto<Object> createCar(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody CarDto carRequestDto) {
         try {
             User user = userService.findUserById(userDetail.getId());
 
@@ -39,8 +36,27 @@ public class CarApiController {
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         }
-//        catch (Exception e) {
-//            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
-//        }
+        catch (Exception e) {
+            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
+        }
+    }
+
+    @GetMapping
+    public ResultDto<Object> getCarInfo(@AuthenticationPrincipal CustomUserDetail userDetail) {
+        try {
+            User user = userService.findUserById(userDetail.getId());
+            Car car = user.getGroup().getCar();
+
+            if (car == null) {
+                return ResultDto.of(HttpStatusCode.BAD_REQUEST, "공유차량이 존재하지 않습니다.", null);
+            }
+
+            return ResultDto.of(HttpStatusCode.OK, "공유차량 정보 조회 성공", new CarDto(car));
+        } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        }
+        catch (Exception e) {
+            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
+        }
     }
 }

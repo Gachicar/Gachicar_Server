@@ -3,7 +3,7 @@ package gachicar.gachicarserver.service;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.Group;
 import gachicar.gachicarserver.domain.User;
-import gachicar.gachicarserver.dto.requestDto.CreateCarRequestDto;
+import gachicar.gachicarserver.dto.CarDto;
 import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.ApiErrorStatus;
 import gachicar.gachicarserver.exception.ApiErrorWithItemException;
@@ -26,26 +26,26 @@ public class CarService {
     /**
      * 공유차량 등록
      */
-    public Car createCar(CreateCarRequestDto createCarRequestDto, User user) {
+    public Car createCar(CarDto carDto, User user) {
 
         Group group = user.getGroup();
-        String carNum = createCarRequestDto.getCarNumber();
+        String carNum = carDto.getCarNumber();
         Car car = carRepository.findByNumber(carNum);
 
         // 사용자가 그룹장인지 확인
         if (!group.getManager().equals(user)) {
             throw new ApiErrorException(ApiErrorStatus.NOT_MANAGER);
 
-        } else if (createCarRequestDto.getCarName().equals("")) {
+        } else if (carDto.getCarName().equals("")) {
             throw new ApiErrorWithItemException(ApiErrorStatus.NOT_EXIST, "carName");
 
-        } else if (createCarRequestDto.getCarNumber().equals("")) {
+        } else if (carDto.getCarNumber().equals("")) {
             throw new ApiErrorWithItemException(ApiErrorStatus.NOT_EXIST, "carNumber");
         }
 
         if (car == null) {
             car = Car.builder()
-                    .name(createCarRequestDto.getCarName())
+                    .name(carDto.getCarName())
                     .number(carNum)
                     .group(group)
                     .build();
