@@ -18,8 +18,12 @@ public enum ApiErrorStatus {
     /**
      * 공유차량 Api 관련 에러 코드
      */
-    DUPLICATED_NUMBER(HttpStatusCode.BAD_REQUEST, " 차량번호가 중복되었습니다."),
     NOT_EXIST(HttpStatusCode.BAD_REQUEST, "가 존재하지 않습니다.");
+
+    /**
+     * WebSocket 통신 관련 에러 코드
+     */
+
 
     private final HttpStatusCode code;
     private final String msg;

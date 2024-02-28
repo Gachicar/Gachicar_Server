@@ -1,5 +1,6 @@
 package gachicar.gachicarserver.domain;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,6 +18,7 @@ public class Car {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String carName;
+    private String carNumber;
 
     @OneToOne(mappedBy = "car", cascade = CascadeType.REMOVE)
     private Group group;   // 공유차량이 속한 그룹
@@ -50,5 +52,11 @@ public class Car {
     @Setter
     private Date latestDate;    // 날짜: 차를 최근에 사용한 날짜
 
+    @Builder
+    public Car(String name, String number, Group group) {
+        this.carName = name;
+        this.carNumber = number;
+        this.group = group;
 
+    }
 }
