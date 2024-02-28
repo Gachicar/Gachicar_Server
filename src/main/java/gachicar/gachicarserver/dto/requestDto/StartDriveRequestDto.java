@@ -9,6 +9,6 @@ import lombok.Data;
  */
 @Data
 public class StartDriveRequestDto {
-    private String curLoc;
+    private String departure;
     private String destination;
 }

@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.sql.Time;
+import java.net.ProtocolFamily;
 import java.util.Date;
 
 @Entity
@@ -24,7 +24,7 @@ public class Car {
     private Group group;   // 공유차량이 속한 그룹
 
     @Setter
-    private Boolean carStatus;  // 사용중 TRUE / 사용 가능 FALSE
+    private Boolean carStatus = Boolean.FALSE;  // 사용중 TRUE / 사용 가능 FALSE
 
     @Setter
     private Long nowUser;   // 현재 사용자
@@ -52,11 +52,13 @@ public class Car {
     @Setter
     private Date latestDate;    // 날짜: 차를 최근에 사용한 날짜
 
+    @Setter
+    private String curLoc;      // 현재 위치
+
     @Builder
     public Car(String name, String number, Group group) {
         this.carName = name;
         this.carNumber = number;
         this.group = group;
-
     }
 }
