@@ -54,9 +54,9 @@ public class SharingApiController {
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         }
-        catch (Exception e) {
-            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
-        }
+//        catch (Exception e) {
+//            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
+//        }
     }
 
     /**

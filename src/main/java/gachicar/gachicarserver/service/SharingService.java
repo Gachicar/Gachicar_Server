@@ -10,8 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
@@ -25,7 +25,7 @@ public class SharingService {
 
     public CurLocationDto getCarLoc(Car car) {
         String loc = car.getCurLoc();
-        if (loc.equals("")) {
+        if (loc == null) {
             throw new ApiErrorException(ApiErrorStatus.NOT_EXIST);
         } else {
             return new CurLocationDto(loc);
@@ -75,11 +75,16 @@ public class SharingService {
     // 공유차량 연결
     public Socket connectCar(Car car) {
         // RC카의 IP 주소와 포트 번호
-        String carIP = "RC_CAR_IP_ADDRESS";     // RC_CAR_IP_ADDRESS
-        int carPort = 3000;     // RC_CAR_PORT_NUMBER
+        String carIP = "localhost";     // RC_CAR_IP_ADDRESS
+        int carPort = 9091;     // RC_CAR_PORT_NUMBER
 
         try {
-            // RC카에 소켓 연결
+            // 서버 소켓 생성 및 포트 바인딩
+            ServerSocket serverSocket = new ServerSocket(carPort);
+
+            // 클라이언트 연결 대기
+            Socket clientSocket = serverSocket.accept();
+
             return new Socket(carIP, carPort);
         } catch (Exception e) {
             e.printStackTrace();
@@ -103,6 +108,54 @@ public class SharingService {
         } catch (IOException e) {
             log.error("소켓을 닫는 중 오류가 발생했습니다.", e);
             throw new ApiErrorException(ApiErrorStatus.DISCONNECT_FAILED);
+        }
+    }
+
+    public void sendMessage(){
+        int portNumber = 9999;
+
+        try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
+            System.out.println("Server is running on port " + portNumber);
+
+            while (true) {
+                try (Socket clientSocket = serverSocket.accept();
+                     PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
+
+                    System.out.println("Client connected from " + clientSocket.getInetAddress());
+
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        System.out.println("Received from client: " + inputLine);
+                        out.println("Echo: " + inputLine);
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error handling client request: " + e.getMessage());
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Could not listen on port " + portNumber);
+            e.printStackTrace();
+        }
+    }
+
+    public void socketClient(String command) {
+        String serverAddress = "localhost"; // 대상 서버의 IP 주소
+        int serverPort = 9999; // 대상 서버의 포트 번호
+
+        try (
+                Socket socket = new Socket(serverAddress, serverPort);
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
+        ) {
+            // 서버로 메시지 전송
+            out.println(command);
+
+            // 서버로부터 응답 받기
+            String response = in.readLine();
+            System.out.println("Received from server: " + response);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
