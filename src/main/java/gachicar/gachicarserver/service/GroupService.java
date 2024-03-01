@@ -1,5 +1,6 @@
 package gachicar.gachicarserver.service;
 
+import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.Group;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.GroupDto;
@@ -69,5 +70,10 @@ public class GroupService {
     public void deleteGroup(DeleteGroupRequestDto requestDto) {
         Group group = groupRepository.findById(requestDto.getDeleteId());
         groupRepository.delete(group);
+    }
+
+    @Transactional
+    public void updateGroupCar(Group group, Car car) {
+        group.setCar(car);
     }
 }

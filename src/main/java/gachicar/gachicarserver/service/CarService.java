@@ -9,15 +9,16 @@ import gachicar.gachicarserver.exception.ApiErrorStatus;
 import gachicar.gachicarserver.exception.ApiErrorWithItemException;
 import gachicar.gachicarserver.repository.CarRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 공유차량 비즈니스 로직
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class CarService {
 
     public final CarRepository carRepository;
@@ -26,9 +27,11 @@ public class CarService {
     /**
      * 공유차량 등록
      */
+    @Transactional
     public Car createCar(CarDto carDto, User user) {
 
         Group group = user.getGroup();
+
         String carNum = carDto.getCarNumber();
         Car car = carRepository.findByNumber(carNum);
 
@@ -44,13 +47,17 @@ public class CarService {
         }
 
         if (car == null) {
-            car = Car.builder()
+            Car newCar = Car.builder()
                     .name(carDto.getCarName())
                     .number(carNum)
                     .group(group)
                     .build();
-            carRepository.save(car);
+            carRepository.save(newCar);
+            // 그룹에 차량 설정
+            groupService.updateGroupCar(group, newCar);
         }
+
+
         return car;
     }
 

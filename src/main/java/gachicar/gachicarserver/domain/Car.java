@@ -1,5 +1,6 @@
 package gachicar.gachicarserver.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,10 @@ public class Car {
     private String carName;
     private String carNumber;
 
-    @OneToOne(mappedBy = "car", cascade = CascadeType.REMOVE)
+    @Setter
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
     private Group group;   // 공유차량이 속한 그룹
 
     @Setter
@@ -28,10 +32,6 @@ public class Car {
 
     @Setter
     private Long nowUser;   // 현재 사용자
-
-    public Car(String carName) {
-        this.carName = carName;
-    }
 
     @Setter
     private Long distance;  // 주행거리
@@ -53,7 +53,7 @@ public class Car {
     private Date latestDate;    // 날짜: 차를 최근에 사용한 날짜
 
     @Setter
-    private String curLoc;      // 현재 위치
+    private String curLoc = "집";      // 현재 위치
 
     @Builder
     public Car(String name, String number, Group group) {
