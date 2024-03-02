@@ -20,14 +20,15 @@ public class Group {
     @Setter
     private String desc;
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany
     private List<User> memberList = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id")
     private User manager; // 그룹장
 
-    @OneToOne
+    @Setter
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "car_id")
     private Car car;
 
