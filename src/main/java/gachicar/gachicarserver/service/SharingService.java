@@ -49,34 +49,6 @@ public class SharingService {
 
     }
 
-    public void socketServer(){
-        int portNumber = 9595;
-
-        try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
-            System.out.println("Server is running on port " + portNumber);
-
-            while (true) {
-                try (Socket clientSocket = serverSocket.accept();
-                     PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-                     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
-
-                    System.out.println("Client connected from " + clientSocket.getInetAddress());
-
-                    String inputLine;
-                    while ((inputLine = in.readLine()) != null) {
-                        System.out.println("Received from client: " + inputLine);
-                        out.println("Echo: " + inputLine);
-                    }
-                } catch (IOException e) {
-                    System.err.println("Error handling client request: " + e.getMessage());
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Could not listen on port " + portNumber);
-            e.printStackTrace();
-        }
-    }
-
     /**
      * [파이썬 소켓 서버와 통신]
      * - RC카 주피터랩 ip 주소: 192.168.0.7
