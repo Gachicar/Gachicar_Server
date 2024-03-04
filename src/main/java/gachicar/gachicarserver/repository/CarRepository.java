@@ -4,6 +4,7 @@ import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.Group;
 import gachicar.gachicarserver.domain.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -13,7 +14,7 @@ import javax.persistence.PersistenceContext;
 /**
  * 공유차량 관련 레포지토리
  */
-@Service
+@Repository
 @RequiredArgsConstructor
 public class CarRepository {
 
