@@ -7,9 +7,6 @@ server:
     direct-buffers: true # 다이렉트 버퍼 사용 여부
     buffer-size: 1024 # 버퍼 크기
 
-    websocket:
-      direct-buffers: true
-      buffer-size: 1024
 
 spring:
   datasource:
@@ -24,13 +21,7 @@ spring:
       hibernate:
         # show_sql: true
         format_sql: true
-  redis:
-    host: localhost
-    port: 6379
 
 logging.level:
   org.hibernate.SQL: debug
   org.springframework.security: DEBUG
-
-jwt:
-  secret: Z2FjaGljYXJQcm9qZWN0aW5Tb29rbXl1bmcxOTE5MjA=

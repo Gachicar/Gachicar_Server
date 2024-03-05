@@ -1,6 +1,5 @@
 package gachicar.gachicarserver.api;
 
-import gachicar.gachicarserver.config.jwt.CustomUserDetail;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.CurLocationDto;
@@ -14,7 +13,6 @@ import gachicar.gachicarserver.service.CarService;
 import gachicar.gachicarserver.service.SharingService;
 import gachicar.gachicarserver.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -32,7 +30,7 @@ public class SharingApiController {
     public final SharingService sharingService;
 
     @GetMapping
-    public String getCarStatus(@AuthenticationPrincipal CustomUserDetail userDetail) {
+    public String getCarStatus() {
         return "정상 운행 중";
     }
 
@@ -40,10 +38,9 @@ public class SharingApiController {
      * 차량의 현재 위치 가져오기
      */
     @GetMapping("/loc")
-    public ResultDto<Object> getCurLocation(@AuthenticationPrincipal CustomUserDetail userDetail) {
+    public ResultDto<Object> getCurLocation() {
         try {
-            User user = userService.findUserById(userDetail.getId());
-
+            User user = userService.findUserById(1L);
             // 사용자의 공유차량 가져오기
             Car car = user.getGroup().getCar();
 
@@ -63,10 +60,9 @@ public class SharingApiController {
      * 목적지로 주행 시작
      */
     @PostMapping("/go")
-    public ResultDto<Object> startDrive(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody StartDriveRequestDto requestDto) {
+    public ResultDto<Object> startDrive(@RequestBody StartDriveRequestDto requestDto) {
         try {
-            User user = userService.findUserById(userDetail.getId());
-
+            User user = userService.findUserById(1L);
             // 사용자의 공유차량 가져오기
             Car car = user.getGroup().getCar();
 

@@ -10,13 +10,11 @@ import gachicar.gachicarserver.dto.requestDto.UpdateGroupDescRequestDto;
 import gachicar.gachicarserver.dto.requestDto.UpdateGroupNameRequestDto;
 import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.ApiErrorStatus;
-import gachicar.gachicarserver.exception.ApiErrorWithItemException;
 import gachicar.gachicarserver.repository.GroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor

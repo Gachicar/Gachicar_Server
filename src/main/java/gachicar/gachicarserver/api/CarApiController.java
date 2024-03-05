@@ -1,6 +1,5 @@
 package gachicar.gachicarserver.api;
 
-import gachicar.gachicarserver.config.jwt.CustomUserDetail;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.ResultDto;
@@ -11,7 +10,6 @@ import gachicar.gachicarserver.service.CarService;
 import gachicar.gachicarserver.service.GroupService;
 import gachicar.gachicarserver.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,10 +22,9 @@ public class CarApiController {
     public final CarService carService;
 
     @PostMapping
-    public ResultDto<Object> createCar(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody CarDto carRequestDto) {
+    public ResultDto<Object> createCar(@RequestBody CarDto carRequestDto) {
         try {
-            User user = userService.findUserById(userDetail.getId());
-
+            User user = userService.findUserById(1L);
             // 사용자의 공유차량 등록
             Car car = carService.createCar(carRequestDto, user);
 
@@ -42,9 +39,9 @@ public class CarApiController {
     }
 
     @GetMapping
-    public ResultDto<Object> getCarInfo(@AuthenticationPrincipal CustomUserDetail userDetail) {
+    public ResultDto<Object> getCarInfo() {
         try {
-            User user = userService.findUserById(userDetail.getId());
+            User user = userService.findUserById(1L);
             Car car = user.getGroup().getCar();
 
             if (car == null) {
