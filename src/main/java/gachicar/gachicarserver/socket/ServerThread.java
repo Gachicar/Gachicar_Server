@@ -1,57 +1,76 @@
 package gachicar.gachicarserver.socket;
 
+import gachicar.gachicarserver.domain.Car;
+import gachicar.gachicarserver.domain.User;
+import gachicar.gachicarserver.service.CarService;
+import gachicar.gachicarserver.service.SharingService;
+import gachicar.gachicarserver.service.UserService;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentMap;
 
-public class ServerThread implements Runnable{
-    Socket child;
-    BufferedReader ois;
-    PrintWriter oos;
-    HashMap<String, PrintWriter> hm;
+
+public class ServerThread implements Runnable {
+
+    private final Socket clientSocket;
+    private BufferedReader ois;
+    private PrintWriter oos;
+    private final ConcurrentMap<Long, PrintWriter> hm;
     InetAddress ip;
-    String nickname;
+    Long userId;
+    User user;
+    Car car;
 
-    public ServerThread(Socket s, HashMap<String, PrintWriter> h, String user_id) throws IOException {
-        child = s;
-        hm = h;
+    private final UserService userService;
+    private final SharingService sharingService;
+    private final CarService carService;
 
-        try	{
-            ois = new BufferedReader(new InputStreamReader(child.getInputStream()));
-            oos = new PrintWriter(child.getOutputStream(), true);
+    public ServerThread(Socket s, ConcurrentMap<Long, PrintWriter> hm, Long userId, UserService userService, SharingService sharingService, CarService carService) throws IOException {
 
-            ip = child.getInetAddress();
-            nickname = user_id;
+        this.clientSocket = s;
+        this.hm = hm;
+        this.userId = userId;
+        this.userService = userService;
+        this.sharingService = sharingService;
+        this.carService = carService;
 
-            synchronized (hm) { //임계영역 설정
-                hm.put(user_id, oos);
-            }
+        this.ois = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        this.oos = new PrintWriter(clientSocket.getOutputStream(), true);
 
-            System.out.println(ip + "로부터 " + user_id + "님이 접속하였습니다.");
+        this.ip = clientSocket.getInetAddress();
 
-            String userCarName = "가치카";
-            oos.println("사용자의 공유차량: " + userCarName);
+        // 클라이언트에서 사용자 아이디 보내고 시작
+        this.user = userService.findUserById(userId); // Assuming userService is properly initialized
+        System.out.println(user.getName());
+        this.car = carService.findByUser(user); // Assuming carService is properly initialized
+        System.out.println(car.getCarName());
+//
+//            String userCarName = car.getCarName();
+//            oos.println("사용자의 공유차량: " + userCarName);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
     }
 
+    @Override
     public void run() {
         String inputLine;
+
         try {
+            System.out.println(ip + "로부터 " + user.getName() + "님이 접속하였습니다.");
+
             while ((inputLine = ois.readLine()) != null) {
                 // TODO : RC카 주행이 끝나면 자동으로 리포트를 보냄.
                 if (inputLine.equals("/quit")) {
                     // 주행 기록 요약
-                    report(nickname);
+                    report(car);
 
                     synchronized(hm) {
-                        hm.remove(nickname);
+                        hm.remove(userId);
                     }
                     break; // 클라이언트와의 연결 종료
                 } else if (inputLine.contains("안녕")) {
@@ -60,17 +79,22 @@ public class ServerThread implements Runnable{
                     speakToMe("저는 지금 학교에 있습니다.");
                 } else if (inputLine.contains("가") || inputLine.contains("와")) {
                     String destination = "";
+                    String command = "시작";
                     if (inputLine.contains("집")) {
                         destination = "집";
                     } else if (inputLine.contains("학교")) {
                         destination = "학교";
                     }
                     speakToMe("네, 알겠습니다.");
-                    checkRC("학교", destination, "시작");
-                    // TODO : RC카에 명령 보내기
+                    checkRC("학교", destination, command);
+
+                    sharingService.startDrive(user, destination, command);
+
                 }
                 else {
+//                    extractDest(inputLine);
                     System.out.println("Received from client: " + inputLine);
+                    oos.println("Server received: " + inputLine);
                 }
 
             }
@@ -79,22 +103,9 @@ public class ServerThread implements Runnable{
             try {
                 ois.close();
                 oos.close();
-                child.close();
+                clientSocket.close();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
-            }
-        }
-    }
-
-    // 전체 메시지
-    public void broadcast(String message){
-        synchronized(hm) {
-            try {
-                for (PrintWriter oos : hm.values( )){
-                    oos.println(message);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
     }
@@ -102,7 +113,7 @@ public class ServerThread implements Runnable{
     // 클라이언트 메시지에 대한 서버 응답 보내기
     public void sendMsgToMe(String message){
         hm.forEach((key, value) -> {
-            if (key.equals(nickname)) {
+            if (key.equals(userId)) {
                 PrintWriter oos = hm.get(key);
                 System.out.println(message);
                 oos.println(message);
@@ -113,7 +124,7 @@ public class ServerThread implements Runnable{
     // 다른 클라이언트에 메시지 보내기
     public void sendMsgToOther(String message){
         hm.forEach((key, value) -> {
-            if (!key.equals(nickname)) {
+            if (!key.equals(userId)) {
                 PrintWriter oos = hm.get(key);
                 oos.println(message);
             }
@@ -133,12 +144,39 @@ public class ServerThread implements Runnable{
         sendMsgToMe("spk/" + message);
     }
 
-    public void report(String user_id) {
-        // 사용자 정보로 공유차량 주행 기록 가져오기
+    public void report(Car car) {
+
         String msg = "[차량 주행 기록]" +
                 "\n주행 거리: 10km" +
                 "\n주유 상태: 보통" +
                 "\n주행 시간: 30분";
         sendMsgToMe("report/" + msg);
+    }
+
+    /**
+     * 사용자 명령에서 목적지 추출하기
+     */
+    public String extractDest(String msg) {
+        String pythonServerAddress = "192.168.0.8";
+        int pythonServerPort = 9999;
+
+        try (
+            Socket socket = new Socket(pythonServerAddress, pythonServerPort);
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
+        ) {
+            // 파이썬 서버에 메시지 전송
+            out.println(msg);
+
+            // 서버로부터 응답 받기
+            String response = in.readLine();
+            System.out.println("Received from server: " + response);
+
+            return response;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return msg;
     }
 }

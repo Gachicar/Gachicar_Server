@@ -1,59 +1,48 @@
 package gachicar.gachicarserver.socket;
 
-import java.io.BufferedReader;
+import gachicar.gachicarserver.service.CarService;
+import gachicar.gachicarserver.service.SharingService;
+import gachicar.gachicarserver.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
 
-
+@Component
+@RequiredArgsConstructor
 public class SocketServer {
 
-    int portNumber = 9595;
-    ServerSocket serverSocket = null;
-    Socket clientSocket = null;
-    HashMap<String, PrintWriter> hm;
-    BufferedReader ois;
-    PrintWriter oos;
-    String user_id;
+    private final ServerSocket serverSocket;
+    private final ExecutorService executorService;
+    private final ConcurrentMap<Long, PrintWriter> clients = new ConcurrentHashMap<>();
 
-    public SocketServer() {
-        ServerThread sr;
-        Thread t;
+    private final UserService userService;
+    private final SharingService sharingService;
+    private final CarService carService;
 
-        try {
-            serverSocket = new ServerSocket(portNumber);
+    public void start() {
+        while (true) {
+            try {
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("Client connected from " + clientSocket.getInetAddress());
 
-            System.out.println("Server is running on port " + portNumber);
+                // 클라이언트의 PrintWriter 가져오기
+                PrintWriter clientWriter = new PrintWriter(clientSocket.getOutputStream(), true);
 
-            hm = new HashMap<String, PrintWriter>();
+                // 클라이언트의 ID를 설정하고 PrintWriter를 hm 맵에 추가
+                long clientId = 1L; // 클라이언트 ID 생성 (원하는 방식으로)
+                clients.put(clientId, clientWriter);
 
-            while (true) {
-                try {
-                    clientSocket = serverSocket.accept();
-
-                    oos = new PrintWriter(clientSocket.getOutputStream(), true);
-                    ois = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
-                    System.out.println("Client connected from " + clientSocket.getInetAddress());
-
-                    user_id = "사용자";
-                    sr = new ServerThread(clientSocket, hm, user_id);
-                    t = new Thread(sr);
-                    t.start();
-
-                    // 클라이언트가 연결을 종료했을 때
-                    System.out.println("Client disconnected");
-
-                } catch (IOException e) {
-                    System.err.println("Error handling client request: " + e.getMessage());
-                }
+                executorService.execute(new ServerThread(clientSocket, clients, clientId, userService, sharingService, carService));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            System.err.println("Could not listen on port " + portNumber);
-            e.printStackTrace();
         }
     }
 
