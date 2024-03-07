@@ -1,9 +1,12 @@
 package gachicar.gachicarserver.domain;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -22,12 +25,24 @@ public class DriveReport {
     @JoinColumn(name = "user_id")
     private User user;          // 사용자
 
-    private float driveTime;    // 주행시간
+    @Setter
+    private Long driveTime;    // 주행시간
 
-    private String startTime;   // 시작시간
-    private String endTime;     // 종료시간
+    private LocalDateTime startTime;   // 시작시간
+
+    @Setter
+    private LocalDateTime endTime;     // 종료시간
 
     private String departure;   // 출발지
 
     private String destination; // 목적지
+
+    @Builder
+    public DriveReport(Car car, User user, LocalDateTime startTime, String departure, String destination) {
+        this.car = car;
+        this.user = user;
+        this.startTime = startTime;
+        this.departure = departure;
+        this.destination = destination;
+    }
 }
