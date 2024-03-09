@@ -10,49 +10,39 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.util.concurrent.ConcurrentMap;
 
 
 public class ServerThread implements Runnable {
 
     private final Socket clientSocket;
-    private BufferedReader ois;
-    private PrintWriter oos;
-    private final ConcurrentMap<Long, PrintWriter> hm;
-    InetAddress ip;
-    Long userId;
-    User user;
-    Car car;
-
+    private final CarSocketThread carSocketThread;
+    private final Long userId;
     private final UserService userService;
     private final SharingService sharingService;
     private final CarService carService;
 
-    public ServerThread(Socket s, ConcurrentMap<Long, PrintWriter> hm, Long userId, UserService userService, SharingService sharingService, CarService carService) throws IOException {
+    private PrintWriter androidClientWriter;
 
-        this.clientSocket = s;
-        this.hm = hm;
+    User user;
+    Car car;
+
+    public ServerThread(Socket clientSocket, CarSocketThread carSocketThread, Long userId, UserService userService, SharingService sharingService, CarService carService) {
+        this.clientSocket = clientSocket;
+        this.carSocketThread = carSocketThread;
         this.userId = userId;
         this.userService = userService;
         this.sharingService = sharingService;
         this.carService = carService;
 
-        this.ois = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        this.oos = new PrintWriter(clientSocket.getOutputStream(), true);
+        try {
+            this.androidClientWriter = new PrintWriter(clientSocket.getOutputStream(), true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        this.ip = clientSocket.getInetAddress();
-
-        // 클라이언트에서 사용자 아이디 보내고 시작
-        this.user = userService.findUserById(userId); // Assuming userService is properly initialized
-        System.out.println(user.getName());
-        this.car = carService.findByUser(user); // Assuming carService is properly initialized
-        System.out.println(car.getCarName());
-//
-//            String userCarName = car.getCarName();
-//            oos.println("사용자의 공유차량: " + userCarName);
-
+        this.user = userService.findUserById(userId);
+        this.car = carService.findByUser(user);
 
     }
 
@@ -60,97 +50,80 @@ public class ServerThread implements Runnable {
     public void run() {
         String inputLine;
 
-        try {
-            System.out.println(ip + "로부터 " + user.getName() + "님이 접속하였습니다.");
+        try (BufferedReader ois = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));) {
 
-            while ((inputLine = ois.readLine()) != null) {
-                // TODO : RC카 주행이 끝나면 자동으로 리포트를 보냄.
-                if (inputLine.equals("/quit")) {
-                    // 주행 기록 요약
-                    report(car);
+            System.out.println("Client connected from " + clientSocket.getInetAddress());
+            androidClientWriter.println(user.getName() + "님의 공유차량은 " + car.getCarName() + " 입니다.");
+            if (car.getCarStatus() == Boolean.TRUE) {
+                androidClientWriter.println("지금은 공유차량을 사용할 수 없습니다.");
+            } else {
+                // 차량 상태를 사용 중 상태로 변경
+                car.setCarStatus(Boolean.TRUE);
 
-                    synchronized(hm) {
-                        hm.remove(userId);
+                while ((inputLine = ois.readLine()) != null) {
+                    // 클라이언트로부터 메시지 수신
+                    System.out.println("Received from Android client: " + inputLine);
+
+                    if (inputLine.contains("종료")) {
+                        speakToMe("운행을 종료합니다.");
+                        carSocketThread.sendToCar("종료");
+                        break;
+                    } else if (inputLine.contains("안녕")) {
+                        speakToMe("안녕하세요. 무엇을 도와드릴까요?");
+                    } else if (inputLine.contains("어디")) {
+                        // 공유차량의 현재 위치 확인
+                        speakToMe("저는 지금 " + car.getCurLoc() + "에 있습니다.");
+                    } else if (inputLine.contains("가") || inputLine.contains("와")) {
+                        String destination = "";
+                        String command = "시작";
+                        if (inputLine.contains("집")) {
+                            destination = "집";
+                        } else if (inputLine.contains("학교")) {
+                            destination = "학교";
+                        }
+                        speakToMe("네, 알겠습니다.");
+                        checkRC("학교", destination, command);
+
+                        // 메시지를 RC 카로 전달
+                        carSocketThread.sendToCar("시작");
+                        sharingService.makeReport(user, destination, command);
                     }
-                    break; // 클라이언트와의 연결 종료
-                } else if (inputLine.contains("안녕")) {
-                    speakToMe("안녕하세요. 무엇을 도와드릴까요?");
-                } else if (inputLine.contains("어디")) {
-                    speakToMe("저는 지금 학교에 있습니다.");
-                } else if (inputLine.contains("가") || inputLine.contains("와")) {
-                    String destination = "";
-                    String command = "시작";
-                    if (inputLine.contains("집")) {
-                        destination = "집";
-                    } else if (inputLine.contains("학교")) {
-                        destination = "학교";
-                    }
-                    speakToMe("네, 알겠습니다.");
-                    checkRC("학교", destination, command);
-
-                    sharingService.startDrive(user, destination, command);
-
                 }
-                else {
-//                    extractDest(inputLine);
-                    System.out.println("Received from client: " + inputLine);
-                    oos.println("Server received: " + inputLine);
-                }
-
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
-            try {
-                ois.close();
-                oos.close();
-                clientSocket.close();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+        } finally {
+            // 클라이언트 소켓과 RC 카 소켓 닫기
+            closeClientSocket();
         }
-    }
-
-    // 클라이언트 메시지에 대한 서버 응답 보내기
-    public void sendMsgToMe(String message){
-        hm.forEach((key, value) -> {
-            if (key.equals(userId)) {
-                PrintWriter oos = hm.get(key);
-                System.out.println(message);
-                oos.println(message);
-            }
-        });
-    }
-
-    // 다른 클라이언트에 메시지 보내기
-    public void sendMsgToOther(String message){
-        hm.forEach((key, value) -> {
-            if (!key.equals(userId)) {
-                PrintWriter oos = hm.get(key);
-                oos.println(message);
-            }
-        });
     }
 
     // 사용자 명령 확인 메시지 생성
     public void checkRC(String departure, String destination, String Command) {
         // 원래는.. 사용자 id로 공유차량 정보 가져오기
         // + 사용자, 출발지, 목적지 => DB에 저장
-        sendMsgToMe("r/- 출발지: " + departure +
+        sendToAndroidClient("r/- 출발지: " + departure +
                 "\n- 목적지: " + destination +
                 "\n- 명령어: " + "시작");
     }
 
     public void speakToMe(String message) {
-        sendMsgToMe("spk/" + message);
+        sendToAndroidClient("spk/" + message);
     }
 
-    public void report(Car car) {
+    // 안드로이드 클라이언트로 메시지 보내기
+    private void sendToAndroidClient(String message) {
+        androidClientWriter.println(message); // PrintWriter를 사용하여 메시지를 안드로이드 클라이언트로 전송
+        System.out.println("Sent to Android client: " + message);
+    }
 
-        String msg = "[차량 주행 기록]" +
-                "\n주행 거리: 10km" +
-                "\n주유 상태: 보통" +
-                "\n주행 시간: 30분";
-        sendMsgToMe("report/" + msg);
+    private void closeClientSocket() {
+        try {
+            clientSocket.close();
+            System.out.println("Closed client socket for user: " + userId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
