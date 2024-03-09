@@ -4,18 +4,15 @@ import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.CurLocationDto;
 import gachicar.gachicarserver.dto.ResultDto;
-import gachicar.gachicarserver.dto.requestDto.StartDriveRequestDto;
-import gachicar.gachicarserver.exception.ApiErrorException;
-import gachicar.gachicarserver.exception.ApiErrorStatus;
 import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.HttpStatusCode;
 import gachicar.gachicarserver.service.CarService;
 import gachicar.gachicarserver.service.SharingService;
 import gachicar.gachicarserver.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 공유차량 주행 관련 API Controller
@@ -56,36 +53,4 @@ public class SharingApiController {
 //        }
     }
 
-    /**
-     * 목적지로 주행 시작
-     */
-    @PostMapping("/go")
-    public ResultDto<Object> startDrive(@RequestBody StartDriveRequestDto requestDto) {
-        try {
-            User user = userService.findUserById(1L);
-            // 사용자의 공유차량 가져오기
-            Car car = user.getGroup().getCar();
-
-            // 사용 가능 상태인지 확인
-            if (car.getCarStatus()) {
-                return ResultDto.of(HttpStatusCode.BAD_REQUEST, "다른 사용자가 사용 중", car.getNowUser());
-            }
-
-            sharingService.startDrive(car, requestDto);
-
-            return ResultDto.of(HttpStatusCode.OK, "주행 시작", null);
-
-        } catch (AuthErrorException e) {
-            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new ApiErrorException(ApiErrorStatus.SOCKET_ERROR);
-        }
-//        catch (Exception e) {
-//            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
-//        }
-
-        // 목적지로 주행
-        // 주기적으로 상태 보냄.
-    }
 }
