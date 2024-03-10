@@ -1,6 +1,8 @@
 package gachicar.gachicarserver.socket;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
@@ -10,9 +12,6 @@ import java.net.Socket;
  * - 접속 포트: 9851
  */
 public class CarSocketThread implements Runnable {
-
-    private final String carIpAddress = "localhost";    // RC카의 IP 주소
-    private final int carPort = 9851;                   // RC카의 포트 번호
 
     private final long userId;                          // 사용자 ID
     private Socket carSocket;                     // RC카와의 소켓 연결
@@ -24,6 +23,10 @@ public class CarSocketThread implements Runnable {
 
     private void connectToCar() {
         try {
+            // RC카의 IP 주소
+            String carIpAddress = "192.168.0.7";
+            // RC카의 포트 번호
+            int carPort = 9851;
             carSocket = new Socket(carIpAddress, carPort);
             carWriter = new PrintWriter(carSocket.getOutputStream(), true);
         } catch (IOException e) {
@@ -43,7 +46,21 @@ public class CarSocketThread implements Runnable {
     @Override
     public void run() {
         connectToCar(); // RC카와의 연결 설정
-        // RC카와의 소켓 연결을 유지하는 코드를 작성합니다.
+
+        try (BufferedReader carReader = new BufferedReader(new InputStreamReader(carSocket.getInputStream()))) {
+            String inputLine;
+            while ((inputLine = carReader.readLine()) != null) {
+                // RC카로부터 메시지를 읽고 원하는 작업을 수행합니다.
+                System.out.println("Received from RC car: " + inputLine);
+
+                // 여기에 RC카로부터 받은 메시지에 대한 작업을 추가합니다.
+                // TODO : RC카 주행 상태에 따라 클라이언트에게 메시지 전달
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            closeCarSocket(); // 소켓 닫기
+        }
     }
 
     public void closeCarSocket() {

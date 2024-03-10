@@ -22,7 +22,6 @@ public class SocketServer {
     private final Map<Long, Socket> clientSockets = new ConcurrentHashMap<>();
     private final Map<Long, CarSocketThread> userCarSocketThreads = new ConcurrentHashMap<>();
 
-
     private final UserService userService;
     private final SharingService sharingService;
     private final CarService carService;
@@ -41,8 +40,13 @@ public class SocketServer {
                 CarSocketThread carSocketThread = new CarSocketThread(clientId);
                 userCarSocketThreads.put(clientId, carSocketThread);
 
+                // 목적지 토큰을 반환하는 스레드 실행
+                TokenSocketThread tokenSocketThread = new TokenSocketThread();
+                executorService.execute(tokenSocketThread);
+
                 // 안드로이드 클라이언트와의 소켓 연결을 처리하는 스레드 실행
-                ServerThread serverThread = new ServerThread(clientSocket, carSocketThread, clientId, userService, sharingService, carService);
+                ServerThread serverThread = new ServerThread(clientSocket, carSocketThread, tokenSocketThread,
+                                                                clientId, userService, sharingService, carService);
                 executorService.execute(serverThread);
 
                 // 해당 사용자에 대한 CarSocketThread 객체 생성 실행

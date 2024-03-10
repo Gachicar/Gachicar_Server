@@ -17,6 +17,8 @@ public class ServerThread implements Runnable {
 
     private final Socket clientSocket;
     private final CarSocketThread carSocketThread;
+    private final TokenSocketThread tokenSocketThread;
+
     private final Long userId;
     private final UserService userService;
     private final SharingService sharingService;
@@ -27,9 +29,11 @@ public class ServerThread implements Runnable {
     User user;
     Car car;
 
-    public ServerThread(Socket clientSocket, CarSocketThread carSocketThread, Long userId, UserService userService, SharingService sharingService, CarService carService) {
+    public ServerThread(Socket clientSocket, CarSocketThread carSocketThread, TokenSocketThread tokenSocketThread,
+                        Long userId, UserService userService, SharingService sharingService, CarService carService) {
         this.clientSocket = clientSocket;
         this.carSocketThread = carSocketThread;
+        this.tokenSocketThread = tokenSocketThread;
         this.userId = userId;
         this.userService = userService;
         this.sharingService = sharingService;
@@ -50,7 +54,7 @@ public class ServerThread implements Runnable {
     public void run() {
         String inputLine;
 
-        try (BufferedReader ois = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));) {
+        try (BufferedReader ois = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
 
             System.out.println("Client connected from " + clientSocket.getInetAddress());
             androidClientWriter.println(user.getName() + "님의 공유차량은 " + car.getCarName() + " 입니다.");
@@ -76,18 +80,32 @@ public class ServerThread implements Runnable {
                     } else if (inputLine.contains("가") || inputLine.contains("와")) {
                         String destination = "";
                         String command = "시작";
-                        if (inputLine.contains("집")) {
-                            destination = "집";
-                        } else if (inputLine.contains("학교")) {
-                            destination = "학교";
+                        // 목적지 토큰 추출해주는 서버에 메시지 전달
+                        String tokenResponse = sendAndReceiveTokenMessage(inputLine);
+                        System.out.println("Received response from Token Server: " + tokenResponse);
+
+                        if (tokenResponse != null) {
+                            // 목적지 토큰을 성공적으로 받아왔을 때에만 다음 작업을 진행
+                            // tokenResponse를 이용하여 다음 작업 수행
+                            System.out.println("토큰 응답 받기 성공. 다음 코드 수행 : " + tokenResponse);
+                            destination = tokenResponse;
                         }
+//                        if (inputLine.contains("집")) {
+//                            destination = "집";
+//                        } else if (inputLine.contains("학교")) {
+//                            destination = "학교";
+//                        }
                         speakToMe("네, 알겠습니다.");
                         checkRC("학교", destination, command);
 
                         // 메시지를 RC 카로 전달
                         carSocketThread.sendToCar("시작");
-                        sharingService.makeReport(user, destination, command);
+                        sharingService.makeReport(user, destination, command);  // 리포트 생성
                     }
+//                    else {
+//                        carSocketThread.sendToCar("시작");
+//                        sharingService.makeReport(user, tokenResponse, "시작");
+//                    }
                 }
             }
         } catch (IOException e) {
@@ -129,27 +147,13 @@ public class ServerThread implements Runnable {
     /**
      * 사용자 명령에서 목적지 추출하기
      */
-    public String extractDest(String msg) {
-        String pythonServerAddress = "192.168.0.8";
-        int pythonServerPort = 9999;
-
-        try (
-            Socket socket = new Socket(pythonServerAddress, pythonServerPort);
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
-        ) {
-            // 파이썬 서버에 메시지 전송
-            out.println(msg);
-
-            // 서버로부터 응답 받기
-            String response = in.readLine();
-            System.out.println("Received from server: " + response);
-
-            return response;
-
-        } catch (IOException e) {
-            e.printStackTrace();
+    private String sendAndReceiveTokenMessage(String message) {
+        if (tokenSocketThread != null) {
+            return tokenSocketThread.sendAndReceiveFromTokenServer(message);
+        } else {
+            System.out.println("TokenSocketThread is not available.");
+            return null;
         }
-        return msg;
     }
+
 }
