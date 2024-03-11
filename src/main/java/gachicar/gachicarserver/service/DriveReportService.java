@@ -3,11 +3,13 @@ package gachicar.gachicarserver.service;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.DriveReport;
 import gachicar.gachicarserver.domain.User;
+import gachicar.gachicarserver.dto.ReportDto;
 import gachicar.gachicarserver.repository.DriveReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Service
@@ -33,6 +35,27 @@ public class DriveReportService {
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("주행 기록 생성에서 에러 발생");
+        }
+    }
+
+    @Transactional
+    public void updateReport(Long userId) {
+        DriveReport driveReport = reportRepository.findRecentByUser(userId);
+
+        LocalDateTime endTime = LocalDateTime.now();
+        Duration diff = Duration.between(driveReport.getStartTime(), endTime);
+        Long diffMin = diff.toMinutes();
+
+        driveReport.setEndTime(endTime);
+        driveReport.setDriveTime(diffMin);
+    }
+
+    public ReportDto getRecentReport(Long userId) {
+        DriveReport driveReport = reportRepository.findRecentByUser(userId);
+        if (driveReport != null) {
+            return new ReportDto(driveReport);
+        } else {
+            return null;
         }
     }
 

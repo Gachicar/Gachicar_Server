@@ -37,7 +37,7 @@ public class SocketServer {
                 clientSockets.put(clientId, clientSocket);
 
                 // 해당 사용자에 대한 CarSocketThread 객체 생성
-                CarSocketThread carSocketThread = new CarSocketThread(clientId);
+                CarSocketThread carSocketThread = new CarSocketThread(clientId, driveReportService);
                 userCarSocketThreads.put(clientId, carSocketThread);
 
                 // 목적지 토큰을 반환하는 스레드 실행
