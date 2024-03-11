@@ -3,7 +3,7 @@ package gachicar.gachicarserver.socket;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.service.CarService;
-import gachicar.gachicarserver.service.SharingService;
+import gachicar.gachicarserver.service.DriveReportService;
 import gachicar.gachicarserver.service.UserService;
 
 import java.io.BufferedReader;
@@ -21,7 +21,7 @@ public class ServerThread implements Runnable {
 
     private final Long userId;
     private final UserService userService;
-    private final SharingService sharingService;
+    private final DriveReportService driveReportService;
     private final CarService carService;
 
     private PrintWriter androidClientWriter;
@@ -30,13 +30,13 @@ public class ServerThread implements Runnable {
     Car car;
 
     public ServerThread(Socket clientSocket, CarSocketThread carSocketThread, TokenSocketThread tokenSocketThread,
-                        Long userId, UserService userService, SharingService sharingService, CarService carService) {
+                        Long userId, UserService userService, DriveReportService driveReportService, CarService carService) {
         this.clientSocket = clientSocket;
         this.carSocketThread = carSocketThread;
         this.tokenSocketThread = tokenSocketThread;
         this.userId = userId;
         this.userService = userService;
-        this.sharingService = sharingService;
+        this.driveReportService = driveReportService;
         this.carService = carService;
 
         try {
@@ -100,7 +100,7 @@ public class ServerThread implements Runnable {
 
                         // 메시지를 RC 카로 전달
                         carSocketThread.sendToCar("시작");
-                        sharingService.makeReport(user, destination, command);  // 리포트 생성
+                        driveReportService.createReport(user, destination);  // 리포트 생성
                     }
 //                    else {
 //                        carSocketThread.sendToCar("시작");

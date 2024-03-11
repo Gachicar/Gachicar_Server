@@ -1,7 +1,7 @@
 package gachicar.gachicarserver;
 
 import gachicar.gachicarserver.service.CarService;
-import gachicar.gachicarserver.service.SharingService;
+import gachicar.gachicarserver.service.DriveReportService;
 import gachicar.gachicarserver.service.UserService;
 import gachicar.gachicarserver.socket.SocketServer;
 import org.springframework.boot.SpringApplication;
@@ -32,8 +32,8 @@ public class GachicarApplication {
 	}
 
 	@Bean
-	public SocketServer customSocketServer(ServerSocket serverSocket, ExecutorService executorService, UserService userService, SharingService sharingService, CarService carService) {
-		SocketServer socketServer = new SocketServer(serverSocket, executorService, userService, sharingService, carService);
+	public SocketServer customSocketServer(ServerSocket serverSocket, ExecutorService executorService, UserService userService, DriveReportService driveReportService, CarService carService) {
+		SocketServer socketServer = new SocketServer(serverSocket, executorService, userService, driveReportService, carService);
 		socketServer.start();
 		return socketServer;
 	}

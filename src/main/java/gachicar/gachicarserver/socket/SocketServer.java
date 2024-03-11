@@ -1,7 +1,7 @@
 package gachicar.gachicarserver.socket;
 
 import gachicar.gachicarserver.service.CarService;
-import gachicar.gachicarserver.service.SharingService;
+import gachicar.gachicarserver.service.DriveReportService;
 import gachicar.gachicarserver.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ public class SocketServer {
     private final Map<Long, CarSocketThread> userCarSocketThreads = new ConcurrentHashMap<>();
 
     private final UserService userService;
-    private final SharingService sharingService;
+    private final DriveReportService driveReportService;
     private final CarService carService;
 
     public void start() {
@@ -46,7 +46,7 @@ public class SocketServer {
 
                 // 안드로이드 클라이언트와의 소켓 연결을 처리하는 스레드 실행
                 ServerThread serverThread = new ServerThread(clientSocket, carSocketThread, tokenSocketThread,
-                                                                clientId, userService, sharingService, carService);
+                                                                clientId, userService, driveReportService, carService);
                 executorService.execute(serverThread);
 
                 // 해당 사용자에 대한 CarSocketThread 객체 생성 실행
