@@ -1,6 +1,9 @@
 package gachicar.gachicarserver.api;
 
+import gachicar.gachicarserver.domain.Car;
+import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.ResultDto;
+import gachicar.gachicarserver.dto.UserDto;
 import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.HttpStatusCode;
 import gachicar.gachicarserver.service.CarService;
@@ -34,6 +37,23 @@ public class ReportApiController {
 
             // 주행기록 조회
             return ResultDto.of(HttpStatusCode.OK, "사용자의 주행 리포트 조회 성공", driveReportService.getRecentReport(userId));
+        } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        }
+    }
+
+    /**
+     * 그룹 내 최다 사용자 조회
+     */
+    @GetMapping("/most")
+    public ResultDto<Object> getMostUserInGroup() {
+        try {
+            Long userId = 1L;
+            User user = userService.findUserById(userId);
+            Car car = user.getGroup().getCar();
+            UserDto mostUserInGroupReport = driveReportService.getMostUserInGroupReport(car.getId());
+
+            return ResultDto.of(HttpStatusCode.OK, "그룹 내 최다 사용자 조회 성공", mostUserInGroupReport);
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         }

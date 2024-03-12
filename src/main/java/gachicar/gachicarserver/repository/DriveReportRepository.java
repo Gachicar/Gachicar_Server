@@ -1,6 +1,7 @@
 package gachicar.gachicarserver.repository;
 
 import gachicar.gachicarserver.domain.DriveReport;
+import gachicar.gachicarserver.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -31,6 +32,20 @@ public class DriveReportRepository {
                     .setMaxResults(1)
                     .getSingleResult();
 
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    // 그룹 내 최다 사용자 조회
+    public User findUserWithMostUsageForCar(Long carId) {
+        try {
+            return em.createQuery("SELECT dr.user FROM DriveReport dr " +
+                    "WHERE dr.car.id = :carId " +
+                    "GROUP BY dr.user ORDER BY COUNT(dr.user) DESC", User.class)
+                    .setParameter("carId", carId)
+                    .setMaxResults(1)
+                    .getSingleResult();
         } catch (NoResultException e) {
             return null;
         }

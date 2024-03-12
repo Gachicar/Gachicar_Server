@@ -4,6 +4,7 @@ import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.DriveReport;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.ReportDto;
+import gachicar.gachicarserver.dto.UserDto;
 import gachicar.gachicarserver.repository.DriveReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,14 @@ public class DriveReportService {
         } else {
             return null;
         }
+    }
+
+    /**
+     * 그룹 내 최다 사용자 조회
+     */
+    public UserDto getMostUserInGroupReport(Long carId) {
+        User user = reportRepository.findUserWithMostUsageForCar(carId);
+        return new UserDto(user);
     }
 
 }
