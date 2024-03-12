@@ -4,6 +4,8 @@ import gachicar.gachicarserver.service.CarService;
 import gachicar.gachicarserver.service.DriveReportService;
 import gachicar.gachicarserver.service.UserService;
 import gachicar.gachicarserver.socket.SocketServer;
+import io.undertow.Undertow;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -14,6 +16,7 @@ import java.net.ServerSocket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Slf4j
 @SpringBootApplication(exclude = SecurityAutoConfiguration.class)
 public class GachicarApplication {
 
@@ -38,4 +41,11 @@ public class GachicarApplication {
 		return socketServer;
 	}
 
+	@Bean
+	public Undertow undertow() throws IOException {
+		Undertow.Builder builder = Undertow.builder()
+				.addHttpListener(9090, "localhost"); // HTTP 포트 설정
+		log.info("Undertow 실행 = {}", 9090);
+		return builder.build();
+	}
 }
