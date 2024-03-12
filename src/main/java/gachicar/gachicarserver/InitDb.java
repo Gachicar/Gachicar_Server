@@ -5,6 +5,7 @@ import gachicar.gachicarserver.domain.Group;
 import gachicar.gachicarserver.domain.Role;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.repository.CarRepository;
+import gachicar.gachicarserver.repository.DriveReportRepository;
 import gachicar.gachicarserver.repository.GroupRepository;
 import gachicar.gachicarserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class InitDb {
         private final UserRepository userRepository;
         private final GroupRepository groupRepository;
         private final CarRepository carRepository;
+        private final DriveReportRepository driveReportRepository;
 
         public void initDb() {
             // 사용자 생성
@@ -60,6 +62,24 @@ public class InitDb {
 
             user.setGroup(newGroup);
             newGroup.setCar(newCar);
+
+            // 다른 멤버 생성
+            User user2 = User.builder()
+                    .name("김예지")
+                    .email("yeji@sm.ac.kr")
+                    .build();
+            userRepository.save(user2);
+
+            User user3 = User.builder()
+                    .name("임리안")
+                    .email("rian@sm.ac.kr")
+                    .build();
+            userRepository.save(user3);
+
+            user2.setGroup(newGroup);
+            user3.setGroup(newGroup);
+
+            // 주행 리포트 생성
         }
     }
 
