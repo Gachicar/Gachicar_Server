@@ -1,9 +1,6 @@
 package gachicar.gachicarserver.domain;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -12,6 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Table(name = "DriveReport")
 @NoArgsConstructor
+@AllArgsConstructor
 public class DriveReport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,6 +40,16 @@ public class DriveReport {
         this.car = car;
         this.user = user;
         this.startTime = startTime;
+        this.departure = departure;
+        this.destination = destination;
+    }
+
+    public DriveReport(Car car, User user, Long driveTime, LocalDateTime startTime, LocalDateTime endTime, String departure, String destination) {
+        this.car = car;
+        this.user = user;
+        this.driveTime = driveTime;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.departure = departure;
         this.destination = destination;
     }

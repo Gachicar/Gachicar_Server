@@ -4,6 +4,7 @@ import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.DriveReport;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.ReportDto;
+import gachicar.gachicarserver.dto.UsageCountsDto;
 import gachicar.gachicarserver.dto.UserDto;
 import gachicar.gachicarserver.repository.DriveReportRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -66,6 +68,13 @@ public class DriveReportService {
     public UserDto getMostUserInGroupReport(Long carId) {
         User user = reportRepository.findUserWithMostUsageForCar(carId);
         return new UserDto(user);
+    }
+
+    /**
+     * 그룹원별 공유차량 사용 횟수 조회
+     */
+    public List<UsageCountsDto> getUserUsageCounts(Long carId) {
+        return reportRepository.getUserUsageCountsForCar(carId);
     }
 
 }

@@ -2,12 +2,15 @@ package gachicar.gachicarserver.repository;
 
 import gachicar.gachicarserver.domain.DriveReport;
 import gachicar.gachicarserver.domain.User;
+import gachicar.gachicarserver.dto.UsageCountsDto;
+import gachicar.gachicarserver.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -50,4 +53,28 @@ public class DriveReportRepository {
             return null;
         }
     }
+
+    // 그룹원별 공유차량 사용 횟수 조회
+    public List<UsageCountsDto> getUserUsageCountsForCar(Long carId) {
+        try {
+            List<Object[]> results = em.createQuery("SELECT dr.user, COUNT(dr) FROM DriveReport dr " +
+                            "WHERE dr.car.id = :carId " +
+                            "GROUP BY dr.user", Object[].class)
+                    .setParameter("carId", carId)
+                    .getResultList();
+
+            List<UsageCountsDto> countsDtoList = new ArrayList<>();
+            for (Object[] result : results) {
+                UserDto userDto = new UserDto((User) result[0]);
+                Long count = (Long) result[1];
+                UsageCountsDto usageCountsDto = new UsageCountsDto(userDto, count);
+                countsDtoList.add(usageCountsDto);
+            }
+
+            return countsDtoList;
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
 }
