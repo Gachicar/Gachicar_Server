@@ -1,10 +1,8 @@
 package gachicar.gachicarserver;
 
-import gachicar.gachicarserver.domain.Car;
-import gachicar.gachicarserver.domain.Group;
-import gachicar.gachicarserver.domain.Role;
-import gachicar.gachicarserver.domain.User;
+import gachicar.gachicarserver.domain.*;
 import gachicar.gachicarserver.repository.CarRepository;
+import gachicar.gachicarserver.repository.DriveReportRepository;
 import gachicar.gachicarserver.repository.GroupRepository;
 import gachicar.gachicarserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -32,6 +32,7 @@ public class InitDb {
         private final UserRepository userRepository;
         private final GroupRepository groupRepository;
         private final CarRepository carRepository;
+        private final DriveReportRepository driveReportRepository;
 
         public void initDb() {
             // 사용자 생성
@@ -60,6 +61,49 @@ public class InitDb {
 
             user.setGroup(newGroup);
             newGroup.setCar(newCar);
+
+            // 다른 멤버 생성
+            User user2 = User.builder()
+                    .name("김예지")
+                    .email("yeji@sm.ac.kr")
+                    .build();
+            userRepository.save(user2);
+
+            User user3 = User.builder()
+                    .name("임리안")
+                    .email("rian@sm.ac.kr")
+                    .build();
+            userRepository.save(user3);
+
+            user2.setGroup(newGroup);
+            user3.setGroup(newGroup);
+
+            LocalDateTime dateTime1 = LocalDateTime.of(2024, 3, 15, 10, 30);
+            LocalDateTime dateTime2 = LocalDateTime.of(2024, 3, 28, 15, 45);
+            LocalDateTime dateTime3 = LocalDateTime.of(2024, 3, 5, 8, 0);
+            LocalDateTime dateTime4 = LocalDateTime.of(2024, 3, 20, 12, 0);
+            LocalDateTime dateTime5 = LocalDateTime.of(2024, 3, 10, 17, 20);
+            LocalDateTime dateTime6 = LocalDateTime.of(2024, 3, 1, 9, 0);
+
+            LocalDateTime dateTime11 = LocalDateTime.of(2024, 3, 15, 11, 0);
+            LocalDateTime dateTime22 = LocalDateTime.of(2024, 3, 28, 16, 25);
+            LocalDateTime dateTime33 = LocalDateTime.of(2024, 3, 5, 8, 40);
+            LocalDateTime dateTime44 = LocalDateTime.of(2024, 3, 20, 12, 20);
+            LocalDateTime dateTime55 = LocalDateTime.of(2024, 3, 10, 18, 10);
+            LocalDateTime dateTime66 = LocalDateTime.of(2024, 3, 1, 9, 30);
+
+            User[] userList = {user, user, user, user2, user2, user3};
+            LocalDateTime[] dateTimes = {dateTime1, dateTime2, dateTime3, dateTime4, dateTime5, dateTime6,
+                                            dateTime11, dateTime22, dateTime33, dateTime44, dateTime55, dateTime66};
+            String[] departure = {"집", "집", "회사", "학교", "집", "학교"};
+            String[] dests = {"회사", "회사", "집", "집", "회사", "집"};
+
+            for (int i = 0; i < 6; i++) {
+                Duration diff = Duration.between(dateTimes[i], dateTimes[i+6]);
+                Long diffMin = diff.toMinutes();
+                DriveReport driveReport = new DriveReport(newCar, userList[i], diffMin, dateTimes[i], dateTimes[i+6], departure[i], dests[i]);
+                driveReportRepository.save(driveReport);
+            }
         }
     }
 
