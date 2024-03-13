@@ -23,7 +23,7 @@ public class TokenSocketThread implements Runnable {
     private void connectToTokenServer() {
         try {
             // 토큰 추출 서버 IP 주소
-            String tokenIpAddress = "localhost";
+            String tokenIpAddress = "localhost";    // 192.168.0.8
             // 토큰 추출 서버의 포트 번호
             int tokenPort = 9999;
 
@@ -50,6 +50,11 @@ public class TokenSocketThread implements Runnable {
             System.out.println("Failed to send message to Token Server. Token socket is not available.");
             return null;
         }
+    }
+
+    public void reconnectToTokenServer() {
+        closeTokenSocket();
+        connectToTokenServer();
     }
 
     /**

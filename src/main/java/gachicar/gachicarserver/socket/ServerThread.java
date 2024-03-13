@@ -17,7 +17,7 @@ public class ServerThread implements Runnable {
 
     private final Socket clientSocket;
     private final CarSocketThread carSocketThread;
-    private final TokenSocketThread tokenSocketThread;
+    private TokenSocketThread tokenSocketThread;
 
     private final Long userId;
     private final UserService userService;
@@ -69,7 +69,8 @@ public class ServerThread implements Runnable {
                 while ((inputLine = ois.readLine()) != null) {
                     // 클라이언트로부터 메시지 수신
                     System.out.println("Received from Android client: " + inputLine);
-
+//                    String s = sendAndReceiveTokenMessage(inputLine);
+//                    System.out.println("Received response from Token Server: " + s);
                     if (inputLine.contains("종료")) {
                         speakToMe("운행을 종료합니다.");
                         carSocketThread.sendToCar("종료");
@@ -92,16 +93,11 @@ public class ServerThread implements Runnable {
                             System.out.println("토큰 응답 받기 성공. 다음 코드 수행 : " + tokenResponse);
                             destination = tokenResponse;
                         }
-//                        if (inputLine.contains("집")) {
-//                            destination = "집";
-//                        } else if (inputLine.contains("학교")) {
-//                            destination = "학교";
-//                        }
                         speakToMe("네, 알겠습니다.");
                         checkRC("학교", destination, command);
 
                         // 메시지를 RC 카로 전달
-                        carSocketThread.sendToCar("시작");
+                        carSocketThread.sendToCar(destination);
                         driveReportService.createReport(user, destination);  // 리포트 생성
                     }
 
@@ -148,10 +144,20 @@ public class ServerThread implements Runnable {
      */
     private String sendAndReceiveTokenMessage(String message) {
         if (tokenSocketThread != null) {
-            return tokenSocketThread.sendAndReceiveFromTokenServer(message);
+            String response = tokenSocketThread.sendAndReceiveFromTokenServer(message);
+            if (response == null) {
+                System.out.println("Connection to Token Server lost. Reconnecting...");
+                tokenSocketThread.reconnectToTokenServer(); // 소켓 재연결
+                return tokenSocketThread.sendAndReceiveFromTokenServer(message);
+            } else {
+                return response;
+            }
         } else {
             System.out.println("TokenSocketThread is not available.");
-            return null;
+            System.out.println("다시 연결합니다.");
+            tokenSocketThread = new TokenSocketThread();
+            tokenSocketThread.reconnectToTokenServer();
+            return tokenSocketThread.sendAndReceiveFromTokenServer(message);
         }
     }
 
