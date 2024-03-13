@@ -2,6 +2,7 @@ package gachicar.gachicarserver.api;
 
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.User;
+import gachicar.gachicarserver.dto.ReportDto;
 import gachicar.gachicarserver.dto.ResultDto;
 import gachicar.gachicarserver.dto.UsageCountsDto;
 import gachicar.gachicarserver.dto.UserDto;
@@ -11,9 +12,7 @@ import gachicar.gachicarserver.service.CarService;
 import gachicar.gachicarserver.service.DriveReportService;
 import gachicar.gachicarserver.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -84,4 +83,20 @@ public class ReportApiController {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
         }
     }
+
+    /**
+     * 특정 사용자의 전체 주행기록 조회
+     */
+    @GetMapping("/{userId}")
+    public ResultDto<Object> getUserReports(@PathVariable("userId") Long userId) {
+        try {
+            List<ReportDto> allReportsByUser = driveReportService.getAllReportsByUser(userId);
+            return ResultDto.of(HttpStatusCode.OK, "사용자의 전체 주행기록 조회 성공", allReportsByUser);
+        } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (Exception e) {
+            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
+        }
+    }
+
 }

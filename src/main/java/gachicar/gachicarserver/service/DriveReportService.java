@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -75,6 +76,16 @@ public class DriveReportService {
      */
     public List<UsageCountsDto> getUserUsageCounts(Long carId) {
         return reportRepository.getUserUsageCountsForCar(carId);
+    }
+
+    /**
+     * 사용자의 모든 주행 기록 조회
+     */
+    public List<ReportDto> getAllReportsByUser(Long userId) {
+        List<DriveReport> driveReports = reportRepository.findAllByUser(userId);
+        return driveReports.stream()
+                .map(ReportDto::new)
+                .collect(Collectors.toList());
     }
 
 }

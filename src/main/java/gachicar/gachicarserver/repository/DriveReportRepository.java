@@ -10,7 +10,8 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
@@ -72,6 +73,19 @@ public class DriveReportRepository {
             }
 
             return countsDtoList;
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    // 특정 사용자의 주행 리포트 전체 조회
+    public List<DriveReport> findAllByUser(Long userId) {
+        try {
+            return em.createQuery(
+                            "SELECT dr FROM DriveReport dr " +
+                                    "WHERE dr.user.id = :userId", DriveReport.class)
+                    .setParameter("userId", userId)
+                    .getResultList();
         } catch (NoResultException e) {
             return null;
         }
