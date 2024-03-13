@@ -1,6 +1,5 @@
 package gachicar.gachicarserver.dto;
 
-import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.Group;
 import gachicar.gachicarserver.domain.User;
 import lombok.Data;
@@ -14,13 +13,14 @@ public class GroupDto {
     private String name;
     private String desc;
     private ManagerDto groupManager; // 그룹장
-    private Car car;    // 공유차량
+    private CarDto car;    // 공유차량
 
     public GroupDto(Group group) {
         this.groupId = group.getGroupId();
         this.name = group.getName();
         this.desc = group.getDesc();
         this.groupManager = new ManagerDto(group.getManager());
+        this.car = new CarDto(group.getCar());
     }
 }
 

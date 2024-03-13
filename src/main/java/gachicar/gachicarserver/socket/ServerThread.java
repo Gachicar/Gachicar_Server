@@ -1,144 +1,164 @@
 package gachicar.gachicarserver.socket;
 
+import gachicar.gachicarserver.domain.Car;
+import gachicar.gachicarserver.domain.User;
+import gachicar.gachicarserver.service.CarService;
+import gachicar.gachicarserver.service.DriveReportService;
+import gachicar.gachicarserver.service.UserService;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.util.HashMap;
 
-public class ServerThread implements Runnable{
-    Socket child;
-    BufferedReader ois;
-    PrintWriter oos;
-    HashMap<String, PrintWriter> hm;
-    InetAddress ip;
-    String nickname;
 
-    public ServerThread(Socket s, HashMap<String, PrintWriter> h, String user_id) throws IOException {
-        child = s;
-        hm = h;
+public class ServerThread implements Runnable {
 
-        try	{
-            ois = new BufferedReader(new InputStreamReader(child.getInputStream()));
-            oos = new PrintWriter(child.getOutputStream(), true);
+    private final Socket clientSocket;
+    private final CarSocketThread carSocketThread;
+    private TokenSocketThread tokenSocketThread;
 
-            ip = child.getInetAddress();
-            nickname = user_id;
+    private final Long userId;
+    private final UserService userService;
+    private final DriveReportService driveReportService;
+    private final CarService carService;
 
-            synchronized (hm) { //임계영역 설정
-                hm.put(user_id, oos);
-            }
+    private PrintWriter androidClientWriter;
 
-            System.out.println(ip + "로부터 " + user_id + "님이 접속하였습니다.");
+    User user;
+    Car car;
 
-            String userCarName = "가치카";
-            oos.println("사용자의 공유차량: " + userCarName);
+    public ServerThread(Socket clientSocket, CarSocketThread carSocketThread, TokenSocketThread tokenSocketThread,
+                        Long userId, UserService userService, DriveReportService driveReportService, CarService carService) {
+        this.clientSocket = clientSocket;
+        carSocketThread.setServerThread(this);
+        this.carSocketThread = carSocketThread;
+        this.tokenSocketThread = tokenSocketThread;
+        this.userId = userId;
+        this.userService = userService;
+        this.driveReportService = driveReportService;
+        this.carService = carService;
 
-        } catch (Exception e) {
+        try {
+            this.androidClientWriter = new PrintWriter(clientSocket.getOutputStream(), true);
+        } catch (IOException e) {
             e.printStackTrace();
         }
+
+        this.user = userService.findUserById(userId);
+        this.car = carService.findByUser(user);
+
     }
 
+    @Override
     public void run() {
         String inputLine;
-        try {
-            while ((inputLine = ois.readLine()) != null) {
-                // TODO : RC카 주행이 끝나면 자동으로 리포트를 보냄.
-                if (inputLine.equals("/quit")) {
-                    // 주행 기록 요약
-                    report(nickname);
 
-                    synchronized(hm) {
-                        hm.remove(nickname);
-                    }
-                    break; // 클라이언트와의 연결 종료
-                } else if (inputLine.contains("안녕")) {
-                    speakToMe("안녕하세요. 무엇을 도와드릴까요?");
-                } else if (inputLine.contains("어디")) {
-                    speakToMe("저는 지금 학교에 있습니다.");
-                } else if (inputLine.contains("가") || inputLine.contains("와")) {
-                    String destination = "";
-                    if (inputLine.contains("집")) {
-                        destination = "집";
-                    } else if (inputLine.contains("학교")) {
-                        destination = "학교";
-                    }
-                    speakToMe("네, 알겠습니다.");
-                    checkRC("학교", destination, "시작");
-                    // TODO : RC카에 명령 보내기
-                }
-                else {
-                    System.out.println("Received from client: " + inputLine);
-                }
+        try (BufferedReader ois = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
 
+            System.out.println("Client connected from " + clientSocket.getInetAddress());
+            androidClientWriter.println(user.getName() + "님의 공유차량은 " + car.getCarName() + " 입니다.");
+            if (car.getCarStatus() == Boolean.TRUE) {
+                androidClientWriter.println("지금은 공유차량을 사용할 수 없습니다.");
+            } else {
+                // 차량 상태를 사용 중 상태로 변경
+                car.setCarStatus(Boolean.TRUE);
+                car.setNowUser(userId);
+
+                while ((inputLine = ois.readLine()) != null) {
+                    // 클라이언트로부터 메시지 수신
+                    System.out.println("Received from Android client: " + inputLine);
+//                    String s = sendAndReceiveTokenMessage(inputLine);
+//                    System.out.println("Received response from Token Server: " + s);
+                    if (inputLine.contains("종료")) {
+                        speakToMe("운행을 종료합니다.");
+                        carSocketThread.sendToCar("종료");
+                        break;
+                    } else if (inputLine.contains("안녕")) {
+                        speakToMe("안녕하세요. 무엇을 도와드릴까요?");
+                    } else if (inputLine.contains("어디")) {
+                        // 공유차량의 현재 위치 확인
+                        speakToMe("저는 지금 " + car.getCurLoc() + "에 있습니다.");
+                    } else if (inputLine.contains("가") || inputLine.contains("와")) {
+                        String destination = "";
+                        String command = "시작";
+                        // 목적지 토큰 추출해주는 서버에 메시지 전달
+                        String tokenResponse = sendAndReceiveTokenMessage(inputLine);
+                        System.out.println("Received response from Token Server: " + tokenResponse);
+
+                        if (tokenResponse != null) {
+                            // 목적지 토큰을 성공적으로 받아왔을 때에만 다음 작업을 진행
+                            // tokenResponse를 이용하여 다음 작업 수행
+                            System.out.println("토큰 응답 받기 성공. 다음 코드 수행 : " + tokenResponse);
+                            destination = tokenResponse;
+                        }
+                        speakToMe("네, 알겠습니다.");
+                        checkRC("학교", destination, command);
+
+                        // 메시지를 RC 카로 전달
+                        carSocketThread.sendToCar(destination);
+                        driveReportService.createReport(user, destination);  // 리포트 생성
+                    }
+
+                }
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
-            try {
-                ois.close();
-                oos.close();
-                child.close();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+        } finally {
+            // 클라이언트 소켓과 RC 카 소켓 닫기
+            closeClientSocket();
         }
-    }
-
-    // 전체 메시지
-    public void broadcast(String message){
-        synchronized(hm) {
-            try {
-                for (PrintWriter oos : hm.values( )){
-                    oos.println(message);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    // 클라이언트 메시지에 대한 서버 응답 보내기
-    public void sendMsgToMe(String message){
-        hm.forEach((key, value) -> {
-            if (key.equals(nickname)) {
-                PrintWriter oos = hm.get(key);
-                System.out.println(message);
-                oos.println(message);
-            }
-        });
-    }
-
-    // 다른 클라이언트에 메시지 보내기
-    public void sendMsgToOther(String message){
-        hm.forEach((key, value) -> {
-            if (!key.equals(nickname)) {
-                PrintWriter oos = hm.get(key);
-                oos.println(message);
-            }
-        });
     }
 
     // 사용자 명령 확인 메시지 생성
     public void checkRC(String departure, String destination, String Command) {
         // 원래는.. 사용자 id로 공유차량 정보 가져오기
         // + 사용자, 출발지, 목적지 => DB에 저장
-        sendMsgToMe("r/- 출발지: " + departure +
+        sendToAndroidClient("r/- 출발지: " + departure +
                 "\n- 목적지: " + destination +
                 "\n- 명령어: " + "시작");
     }
 
     public void speakToMe(String message) {
-        sendMsgToMe("spk/" + message);
+        sendToAndroidClient("spk/" + message);
     }
 
-    public void report(String user_id) {
-        // 사용자 정보로 공유차량 주행 기록 가져오기
-        String msg = "[차량 주행 기록]" +
-                "\n주행 거리: 10km" +
-                "\n주유 상태: 보통" +
-                "\n주행 시간: 30분";
-        sendMsgToMe("report/" + msg);
+    // 안드로이드 클라이언트로 메시지 보내기
+    public void sendToAndroidClient(String message) {
+        androidClientWriter.println(message); // PrintWriter를 사용하여 메시지를 안드로이드 클라이언트로 전송
+        System.out.println("Sent to Android client: " + message);
     }
+
+    private void closeClientSocket() {
+        try {
+            clientSocket.close();
+            System.out.println("Closed client socket for user: " + userId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 사용자 명령에서 목적지 추출하기
+     */
+    private String sendAndReceiveTokenMessage(String message) {
+        if (tokenSocketThread != null) {
+            String response = tokenSocketThread.sendAndReceiveFromTokenServer(message);
+            if (response == null) {
+                System.out.println("Connection to Token Server lost. Reconnecting...");
+                tokenSocketThread.reconnectToTokenServer(); // 소켓 재연결
+                return tokenSocketThread.sendAndReceiveFromTokenServer(message);
+            } else {
+                return response;
+            }
+        } else {
+            System.out.println("TokenSocketThread is not available.");
+            System.out.println("다시 연결합니다.");
+            tokenSocketThread = new TokenSocketThread();
+            tokenSocketThread.reconnectToTokenServer();
+            return tokenSocketThread.sendAndReceiveFromTokenServer(message);
+        }
+    }
+
 }

@@ -57,8 +57,11 @@ public class CarService {
             groupService.updateGroupCar(group, newCar);
         }
 
-
         return car;
+    }
+
+    public Car findByUser(User user) {
+        return carRepository.findByGroupId(user.getGroup().getGroupId());
     }
 
 }

@@ -1,15 +1,13 @@
 server:
   port: 9090
   undertow:
-    # HTTP 설정
-    http2:
-      enabled: true # HTTP/2 지원 여부
-    direct-buffers: true # 다이렉트 버퍼 사용 여부
-    buffer-size: 1024 # 버퍼 크기
+    threads:
+      io: 20
+      worker: 200
+    direct-buffers: true
+    buffer-size: 1024
+    max-http-post-size: 10485760
 
-    websocket:
-      direct-buffers: true
-      buffer-size: 1024
 
 spring:
   datasource:
@@ -24,13 +22,7 @@ spring:
       hibernate:
         # show_sql: true
         format_sql: true
-  redis:
-    host: localhost
-    port: 6379
 
 logging.level:
   org.hibernate.SQL: debug
   org.springframework.security: DEBUG
-
-jwt:
-  secret: Z2FjaGljYXJQcm9qZWN0aW5Tb29rbXl1bmcxOTE5MjA=
