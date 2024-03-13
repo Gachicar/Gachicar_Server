@@ -32,6 +32,7 @@ public class ServerThread implements Runnable {
     public ServerThread(Socket clientSocket, CarSocketThread carSocketThread, TokenSocketThread tokenSocketThread,
                         Long userId, UserService userService, DriveReportService driveReportService, CarService carService) {
         this.clientSocket = clientSocket;
+        carSocketThread.setServerThread(this);
         this.carSocketThread = carSocketThread;
         this.tokenSocketThread = tokenSocketThread;
         this.userId = userId;
@@ -63,6 +64,7 @@ public class ServerThread implements Runnable {
             } else {
                 // 차량 상태를 사용 중 상태로 변경
                 car.setCarStatus(Boolean.TRUE);
+                car.setNowUser(userId);
 
                 while ((inputLine = ois.readLine()) != null) {
                     // 클라이언트로부터 메시지 수신
@@ -102,10 +104,7 @@ public class ServerThread implements Runnable {
                         carSocketThread.sendToCar("시작");
                         driveReportService.createReport(user, destination);  // 리포트 생성
                     }
-//                    else {
-//                        carSocketThread.sendToCar("시작");
-//                        sharingService.makeReport(user, tokenResponse, "시작");
-//                    }
+
                 }
             }
         } catch (IOException e) {
@@ -130,7 +129,7 @@ public class ServerThread implements Runnable {
     }
 
     // 안드로이드 클라이언트로 메시지 보내기
-    private void sendToAndroidClient(String message) {
+    public void sendToAndroidClient(String message) {
         androidClientWriter.println(message); // PrintWriter를 사용하여 메시지를 안드로이드 클라이언트로 전송
         System.out.println("Sent to Android client: " + message);
     }

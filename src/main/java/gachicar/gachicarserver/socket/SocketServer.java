@@ -65,4 +65,9 @@ public class SocketServer {
         });
     }
 
+    // CarSocketThread 객체에 접근할 수 있는 메서드
+    public CarSocketThread getCarSocketThread(long clientId) {
+        return userCarSocketThreads.get(clientId);
+    }
+
 }

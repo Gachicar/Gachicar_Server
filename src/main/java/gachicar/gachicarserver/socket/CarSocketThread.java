@@ -1,6 +1,7 @@
 package gachicar.gachicarserver.socket;
 
 import gachicar.gachicarserver.service.DriveReportService;
+import lombok.Setter;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -16,6 +17,10 @@ public class CarSocketThread implements Runnable {
 
     private final long userId;                          // 사용자 ID
     private final DriveReportService driveReportService;
+
+    @Setter
+    private ServerThread serverThread;
+
     private Socket carSocket;                     // RC카와의 소켓 연결
     private PrintWriter carWriter;
 
@@ -61,6 +66,7 @@ public class CarSocketThread implements Runnable {
                     // TODO : RC카 주행 상태에 따라 클라이언트에게 메시지 전달
                     if (inputInt == 0) {
                         driveReportService.updateReport(userId);
+                        sendMessageToAndroidClient("주행을 종료합니다.");
                     }
                 }
             }
@@ -69,6 +75,12 @@ public class CarSocketThread implements Runnable {
         } finally {
             closeCarSocket(); // 소켓 닫기
         }
+    }
+
+    // ServerThread로 메시지를 전달하는 메서드 추가
+    public void sendMessageToAndroidClient(String message) {
+        // ServerThread의 sendMessageToServer 메서드 호출하여 메시지 전달
+        serverThread.sendToAndroidClient(message);
     }
 
     public void closeCarSocket() {
