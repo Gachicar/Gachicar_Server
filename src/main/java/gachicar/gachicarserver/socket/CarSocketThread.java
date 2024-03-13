@@ -64,9 +64,23 @@ public class CarSocketThread implements Runnable {
 
                     // 여기에 RC카로부터 받은 정수에 대한 작업을 추가합니다.
                     // TODO : RC카 주행 상태에 따라 클라이언트에게 메시지 전달
-                    if (inputInt == 0) {
+                    if (inputInt == CarMsg.END.ordinal()) {
                         driveReportService.updateReport(userId);
                         sendMessageToAndroidClient("주행을 종료합니다.");
+                    } else if (inputInt == CarMsg.START.ordinal()) {
+                        sendMessageToAndroidClient("주행을 시작합니다.");
+                    } else if (inputInt == CarMsg.STOP.ordinal()) {
+                        sendMessageToAndroidClient("정지합니다.");
+                    } else if (inputInt == CarMsg.COLLISION_AVOID.ordinal()) {
+                        sendMessageToAndroidClient("장애물을 인식하여 후진합니다.");
+                    } else if (inputInt == CarMsg.NORMAL.ordinal()) {
+                        sendMessageToAndroidClient("정상적으로 주행 중입니다.");
+                    } else if (inputInt == CarMsg.HOME.ordinal()) {
+                        sendMessageToAndroidClient(CarMsg.HOME.name() + "에 도착하였습니다.");
+                    } else if (inputInt == CarMsg.OFFICE.ordinal()) {
+                        sendMessageToAndroidClient(CarMsg.OFFICE.name() + "에 도착하였습니다.");
+                    } else if (inputInt == CarMsg.SCHOOL.ordinal()) {
+                        sendMessageToAndroidClient(CarMsg.SCHOOL.name() + "에 도착하였습니다.");
                     }
                 }
             }
