@@ -38,8 +38,12 @@ public class SocketServer {
                     Socket clientSocket = serverSocket.accept();
                     System.out.println("Client connected from " + clientSocket.getInetAddress());
 
-                    // 클라이언트의 ID를 설정하고 PrintWriter를 hm 맵에 추가
+                    // 클라이언트로부터 ID를 받음
+//                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//                    String clientId = in.readLine(); // 클라이언트가 보낸 ID를 읽음
+//                    System.out.println("Received ID from client: " + clientId);
                     long clientId = 1L; // 클라이언트 ID 생성 (원하는 방식으로)
+
                     clientSockets.put(clientId, clientSocket);
 
                     // 해당 사용자에 대한 CarSocketThread 객체 생성

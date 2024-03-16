@@ -42,6 +42,8 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers("/api/auth/social").permitAll()    // 모든 접근 허용
                 .antMatchers("/api/auth/newToken").permitAll()
+                .antMatchers("/api/group").permitAll()
+//                .antMatchers("/api/group/**").permitAll()
                 .antMatchers("/api/**").authenticated()     // 인증만 되면 들어갈 수 있는 주소
                 .antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")   // 관리자만 접속 가능한 주소
                 .anyRequest().authenticated()  // 이외에는 접근 권한 필요

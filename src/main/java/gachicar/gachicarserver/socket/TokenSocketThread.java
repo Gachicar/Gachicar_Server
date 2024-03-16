@@ -23,8 +23,8 @@ public class TokenSocketThread implements Runnable {
     private void connectToTokenServer() {
         try {
             // 토큰 추출 서버 IP 주소
-            String tokenIpAddress = "localhost";    // 192.168.0.8
-            // 토큰 추출 서버의 포트 번호
+            String tokenIpAddress = "192.168.0.8";    // 192.168.0.8
+            // 토큰 추출 서버의 포트 번호s
             int tokenPort = 9999;
 
             tokenSocket = new Socket(tokenIpAddress, tokenPort);

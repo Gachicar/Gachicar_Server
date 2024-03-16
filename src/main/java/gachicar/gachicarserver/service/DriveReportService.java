@@ -60,6 +60,8 @@ public class DriveReportService {
         driveReport.setDriveTime(diffMin);
 
         driveReport.setType(ReportStatus.COMPLETE);
+
+        carService.updateCarStatus(driveReport, reportRepository.getFavoriteDestination(driveReport.getCar().getId()));
     }
 
     public ReportDto getRecentReport(Long userId) {
@@ -99,6 +101,7 @@ public class DriveReportService {
     /**
      * 예약 리포트 생성
      */
+    @Transactional
     public ReportDto createReserveReport(User user, String destination, String timeStr) throws JsonProcessingException {
         int hour = 0;
 
@@ -115,6 +118,14 @@ public class DriveReportService {
         LocalDate date = LocalDate.now();
         LocalTime time = LocalTime.of(hour, 0);
         LocalDateTime endTime = LocalDateTime.of(date, time);
+
+        // 중복 확인
+        boolean isReservationExist = reportRepository.existsByEndTimeAndUserCar(endTime, userCar);
+        if (isReservationExist) {
+            // 이미 같은 시간에 예약이 있음
+            return null;
+        }
+
         DriveReport driveReport = new DriveReport(userCar, user, endTime, destination);
         reportRepository.save(driveReport);
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.User;
+import gachicar.gachicarserver.dto.ReportDto;
 import gachicar.gachicarserver.dto.requestDto.ReserveRequestDto;
 import gachicar.gachicarserver.service.CarService;
 import gachicar.gachicarserver.service.DriveReportService;
@@ -20,7 +21,7 @@ public class ServerThread implements Runnable {
 
     private final Socket clientSocket;
     private final CarSocketThread carSocketThread;
-    private TokenSocketThread tokenSocketThread;
+    private final TokenSocketThread tokenSocketThread;
 
     private final Long userId;
     private final UserService userService;
@@ -72,33 +73,17 @@ public class ServerThread implements Runnable {
                 while ((inputLine = ois.readLine()) != null) {
                     // 클라이언트로부터 메시지 수신
                     System.out.println("Received from Android client: " + inputLine);
-//                    String s = sendAndReceiveTokenMessage(inputLine);
-//                    System.out.println("Received response from Token Server: " + s);
                     if (inputLine.contains("종료")) {
-                        speakToMe("운행을 종료합니다.");
+                        sendToAndroidClient("운행을 종료합니다.");
                         carSocketThread.sendToCar("종료");
                         break;
                     } else if (inputLine.contains("어디")) {
                         // 공유차량의 현재 위치 확인
-                        speakToMe("저는 지금 " + car.getCurLoc() + "에 있습니다.");
-                    } else if (inputLine.contains("가") || inputLine.contains("와")) {
-                        String destination = "";
-                        String command = "시작";
+                        sendToAndroidClient("저는 지금 " + car.getCurLoc() + "에 있습니다.");
+                    } else {
                         // 목적지 토큰 추출해주는 서버에 메시지 전달
-                        String tokenResponse = sendAndReceiveTokenMessage(inputLine);
-                        System.out.println("Received response from Token Server: " + tokenResponse);
-
-                        if (tokenResponse != null) {
-                            // 목적지 토큰을 성공적으로 받아왔을 때에만 다음 작업을 진행
-                            // tokenResponse를 이용하여 다음 작업 수행
-                            System.out.println("토큰 응답 받기 성공. 다음 코드 수행 : " + tokenResponse);
-                            destination = tokenResponse;
-                        }
-                        speakToMe("네, 알겠습니다.");
-                        checkRC("학교", destination, command);
-
+                        sendAndReceiveTokenMessage(inputLine);
                     }
-
                 }
             }
         } catch (IOException e) {
@@ -107,19 +92,6 @@ public class ServerThread implements Runnable {
             // 클라이언트 소켓과 RC 카 소켓 닫기
             closeClientSocket();
         }
-    }
-
-    // 사용자 명령 확인 메시지 생성
-    public void checkRC(String departure, String destination, String Command) {
-        // 원래는.. 사용자 id로 공유차량 정보 가져오기
-        // + 사용자, 출발지, 목적지 => DB에 저장
-        sendToAndroidClient("r/- 출발지: " + departure +
-                "\n- 목적지: " + destination +
-                "\n- 명령어: " + "시작");
-    }
-
-    public void speakToMe(String message) {
-        sendToAndroidClient("spk/" + message);
     }
 
     // 안드로이드 클라이언트로 메시지 보내기
@@ -140,40 +112,50 @@ public class ServerThread implements Runnable {
     /**
      * 사용자 명령에서 목적지 추출하기
      */
-    private String sendAndReceiveTokenMessage(String message) throws JsonProcessingException {
-        if (tokenSocketThread != null) {
-            String response = tokenSocketThread.sendAndReceiveFromTokenServer(message);
+    private void sendAndReceiveTokenMessage(String message) throws JsonProcessingException {
+        tokenSocketThread.reconnectToTokenServer();
 
-            if (response == null) {
-                tokenSocketThread.reconnectToTokenServer(); // 소켓 재연결
-                return tokenSocketThread.sendAndReceiveFromTokenServer(message);
-            } else {
+        String response = tokenSocketThread.sendAndReceiveFromTokenServer(message);
 
-                // ObjectMapper 객체 생성
-                ObjectMapper objectMapper = new ObjectMapper();
-                // JSON 문자열을 객체로 변환
-                ReserveRequestDto reserveRequestDto = objectMapper.readValue(response, ReserveRequestDto.class);
-                String intention = reserveRequestDto.getIntention();
-
-                if (intention.equals("주문")) {
-                    String destination = reserveRequestDto.getDestination();
-
-                    // 메시지를 RC 카로 전달
-                    carSocketThread.sendToCar(destination);
-                    driveReportService.createReport(user, destination);  // 리포트 생성
-                } else if (intention.equals("예약")) {
-                    driveReportService.createReserveReport(user,reserveRequestDto.getDestination(), reserveRequestDto.getTime());
-                }
-
-                return reserveRequestDto.getResponse();
-
-            }
+        if (response == null) {
+            tokenSocketThread.reconnectToTokenServer(); // 소켓 재연결
+            response = tokenSocketThread.sendAndReceiveFromTokenServer(message);
         } else {
-            System.out.println("TokenSocketThread is not available.");
-            System.out.println("다시 연결합니다.");
-            tokenSocketThread = new TokenSocketThread();
-            tokenSocketThread.reconnectToTokenServer();
-            return tokenSocketThread.sendAndReceiveFromTokenServer(message);
+            System.out.println("Received From Token Server: " + response);
+
+            // test
+//            sendToAndroidClient(response);
+//            carSocketThread.sendToCar(response);
+//            car.setOilStatus(car.getOilStatus()-5);
+//            driveReportService.createReport(user, response);
+
+
+            // ObjectMapper 객체 생성
+            ObjectMapper objectMapper = new ObjectMapper();
+            // JSON 문자열을 객체로 변환
+            ReserveRequestDto reserveRequestDto = objectMapper.readValue(response, ReserveRequestDto.class);
+            String intention = reserveRequestDto.getIntention();
+
+            if (intention.equals("주문")) {
+                String destination = reserveRequestDto.getDestination();
+
+                // 안드로이드 클라이언트에 응답
+                sendToAndroidClient(reserveRequestDto.getResponse());
+
+                // 메시지를 RC 카로 전달
+                carSocketThread.sendToCar(destination);
+                driveReportService.createReport(user, destination);  // 리포트 생성
+            } else if (intention.equals("예약")) {
+                ReportDto reserveReport = driveReportService.createReserveReport(user, reserveRequestDto.getDestination(), reserveRequestDto.getTime());
+
+                if (reserveReport == null) {
+                    sendToAndroidClient("이미 같은 시간에 예약이 있습니다. 다른 시간을 말씀해주세요.");
+                } else {
+                    sendToAndroidClient(reserveRequestDto.getResponse());
+                }
+            } else {
+                sendToAndroidClient(reserveRequestDto.getResponse());
+            }
         }
     }
 
