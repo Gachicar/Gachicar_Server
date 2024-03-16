@@ -1,6 +1,5 @@
 package gachicar.gachicarserver.api;
 
-import gachicar.gachicarserver.config.jwt.CustomUserDetail;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.ReportDto;
@@ -13,8 +12,10 @@ import gachicar.gachicarserver.service.CarService;
 import gachicar.gachicarserver.service.DriveReportService;
 import gachicar.gachicarserver.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -34,10 +35,10 @@ public class ReportApiController {
      * 사용자의 가장 최근 주행 리포트 조회
      */
     @GetMapping
-    public ResultDto<Object> getDriveReport(@AuthenticationPrincipal CustomUserDetail userDetail) {
+    public ResultDto<Object> getDriveReport() {
         try {
             // 주행기록 조회
-            return ResultDto.of(HttpStatusCode.OK, "사용자의 주행 리포트 조회 성공", driveReportService.getRecentReport(userDetail.getId()));
+            return ResultDto.of(HttpStatusCode.OK, "사용자의 주행 리포트 조회 성공", driveReportService.getRecentReport(1L));
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
@@ -49,9 +50,9 @@ public class ReportApiController {
      * 그룹 내 최다 사용자 조회
      */
     @GetMapping("/most")
-    public ResultDto<Object> getMostUserInGroup(@AuthenticationPrincipal CustomUserDetail userDetail) {
+    public ResultDto<Object> getMostUserInGroup() {
         try {
-            User user = userService.findUserById(userDetail.getId());
+            User user = userService.findUserById(1L);
             Car car = user.getGroup().getCar();
             UserDto mostUserInGroupReport = driveReportService.getMostUserInGroupReport(car.getId());
 
@@ -67,9 +68,9 @@ public class ReportApiController {
      * 그룹원별 공유차량 사용 횟수 조회
      */
     @GetMapping("/usage")
-    public ResultDto<Object> getUsersUsageCounts(@AuthenticationPrincipal CustomUserDetail userDetail) {
+    public ResultDto<Object> getUsersUsageCounts() {
         try {
-            User user = userService.findUserById(userDetail.getId());
+            User user = userService.findUserById(1L);
             Car car = user.getGroup().getCar();
 
             List<UsageCountsDto> userUsageCounts = driveReportService.getUserUsageCounts(car.getId());

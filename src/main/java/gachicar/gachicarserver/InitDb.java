@@ -38,7 +38,7 @@ public class InitDb {
             // 사용자 생성
             User user = User.builder()
                     .name("이연수")
-                    .email("bestdustn@sookmyung.ac.kr")
+                    .email("bestdustn@naver.com")
                     .build();
             user.setRole(Role.MANAGER);
             userRepository.save(user);

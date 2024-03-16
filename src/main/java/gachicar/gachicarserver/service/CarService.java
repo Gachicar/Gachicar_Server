@@ -1,6 +1,7 @@
 package gachicar.gachicarserver.service;
 
 import gachicar.gachicarserver.domain.Car;
+import gachicar.gachicarserver.domain.DriveReport;
 import gachicar.gachicarserver.domain.Group;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.CarDto;
@@ -62,6 +63,18 @@ public class CarService {
 
     public Car findByUser(User user) {
         return carRepository.findByGroupId(user.getGroup().getGroupId());
+    }
+
+    // 주행 완료 후 차량 정보 업데이트
+    public void updateCarStatus(DriveReport driveReport, String favoriteDest) {
+        Car car = driveReport.getCar();
+        car.setCarStatus(Boolean.FALSE);
+        car.setCurLoc(driveReport.getDestination());
+        car.setDriveTime(car.getDriveTime() + driveReport.getDriveTime());
+        car.setNowUser(null);
+        car.setLatestDate(driveReport.getEndTime());
+
+        car.setLocation(favoriteDest);
     }
 
 }

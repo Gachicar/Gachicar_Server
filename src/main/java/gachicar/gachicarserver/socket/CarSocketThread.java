@@ -45,11 +45,15 @@ public class CarSocketThread implements Runnable {
     }
 
     public void sendToCar(String message) {
-        if (carWriter != null) {
-            carWriter.println(message);
-            System.out.println("Sent to RC car: " + message);
+        if (carSocket.isClosed()) {
+            reconnectToRCServer();
         } else {
-            System.out.println("Failed to send message to RC car. Car socket is not available.");
+            if (carWriter != null) {
+                carWriter.println(message);
+                System.out.println("Sent to RC car: " + message);
+            } else {
+                System.out.println("Failed to send message to RC car. Car socket is not available.");
+            }
         }
     }
 
