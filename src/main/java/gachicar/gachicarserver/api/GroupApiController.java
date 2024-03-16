@@ -1,5 +1,6 @@
 package gachicar.gachicarserver.api;
 
+import gachicar.gachicarserver.config.jwt.CustomUserDetail;
 import gachicar.gachicarserver.domain.Group;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.GroupDto;
@@ -15,6 +16,7 @@ import gachicar.gachicarserver.service.GroupService;
 import gachicar.gachicarserver.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -34,9 +36,9 @@ public class GroupApiController {
      * 그룹 생성
      */
     @PostMapping
-    public ResultDto<Object> createGroup(@RequestBody CreateGroupRequestDto requestDto) {
+    public ResultDto<Object> createGroup(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody CreateGroupRequestDto requestDto) {
         try {
-            User user = userService.findUserById(1L);
+            User user = userService.findUserById(userDetail.getId());
             Group group = groupService.createGroup(requestDto, user);
             userService.updateGroup(user, group);
 
@@ -52,9 +54,9 @@ public class GroupApiController {
      * 그룹 정보 조회
      */
     @GetMapping
-    public ResultDto<GroupDto> getGroupInfo() {
+    public ResultDto<GroupDto> getGroupInfo(@AuthenticationPrincipal CustomUserDetail userDetail) {
         try {
-            User user = userService.findUserById(1L);
+            User user = userService.findUserById(userDetail.getId());
             GroupDto groupDto = groupService.getUserGroup(user);
 
             return ResultDto.of(HttpStatusCode.OK, "그룹 정보 조회 성공", groupDto);
@@ -69,9 +71,9 @@ public class GroupApiController {
      * 그룹 닉네임 수정
      */
     @PatchMapping("/updateName")
-    public ResultDto<Object> updateGroupName(@RequestBody UpdateGroupNameRequestDto requestDto) {
+    public ResultDto<Object> updateGroupName(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody UpdateGroupNameRequestDto requestDto) {
         try {
-            User user = userService.findUserById(1L);
+            User user = userService.findUserById(userDetail.getId());
             groupService.updateGroupName(user, requestDto);
 
             return ResultDto.of(HttpStatusCode.OK, "그룹 닉네임 수정 성공", null);
@@ -88,9 +90,9 @@ public class GroupApiController {
      * 그룹 한줄 소개 수정
      */
     @PatchMapping("/updateDesc")
-    public ResultDto<Object> updateGroupDesc(@RequestBody UpdateGroupDescRequestDto requestDto) {
+    public ResultDto<Object> updateGroupDesc(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody UpdateGroupDescRequestDto requestDto) {
         try {
-            User user = userService.findUserById(1L);
+            User user = userService.findUserById(userDetail.getId());
             groupService.updateGroupDesc(user, requestDto);
 
             return ResultDto.of(HttpStatusCode.OK, "그룹 한줄소개 수정 성공", null);
@@ -107,9 +109,9 @@ public class GroupApiController {
      * 그룹 삭제
      */
     @DeleteMapping
-    public ResultDto<Object> deleteGroup(@RequestBody DeleteGroupRequestDto requestDto) {
+    public ResultDto<Object> deleteGroup(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody DeleteGroupRequestDto requestDto) {
         try {
-            User user = userService.findUserById(1L);
+            User user = userService.findUserById(userDetail.getId());
             userService.deleteGroup(user, requestDto);
             groupService.deleteGroup(requestDto);
 
