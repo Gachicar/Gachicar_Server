@@ -1,7 +1,9 @@
 package gachicar.gachicarserver.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.DriveReport;
+import gachicar.gachicarserver.domain.ReportStatus;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.ReportDto;
 import gachicar.gachicarserver.dto.UsageCountsDto;
@@ -12,8 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,6 +58,8 @@ public class DriveReportService {
 
         driveReport.setEndTime(endTime);
         driveReport.setDriveTime(diffMin);
+
+        driveReport.setType(ReportStatus.COMPLETE);
     }
 
     public ReportDto getRecentReport(Long userId) {
@@ -88,4 +96,28 @@ public class DriveReportService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 예약 리포트 생성
+     */
+    public ReportDto createReserveReport(User user, String destination, String timeStr) throws JsonProcessingException {
+        int hour = 0;
+
+        // 정규 표현식을 사용하여 숫자 부분을 추출
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(timeStr);
+
+        if (matcher.find()) {
+            // 숫자 부분을 정수로 변환
+            hour = Integer.parseInt(matcher.group());
+        }
+
+        Car userCar = carService.findByUser(user);
+        LocalDate date = LocalDate.now();
+        LocalTime time = LocalTime.of(hour, 0);
+        LocalDateTime endTime = LocalDateTime.of(date, time);
+        DriveReport driveReport = new DriveReport(userCar, user, endTime, destination);
+        reportRepository.save(driveReport);
+
+        return new ReportDto(driveReport);
+    }
 }
