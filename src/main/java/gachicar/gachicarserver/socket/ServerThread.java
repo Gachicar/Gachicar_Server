@@ -1,7 +1,10 @@
 package gachicar.gachicarserver.socket;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.User;
+import gachicar.gachicarserver.dto.requestDto.ReserveRequestDto;
 import gachicar.gachicarserver.service.CarService;
 import gachicar.gachicarserver.service.DriveReportService;
 import gachicar.gachicarserver.service.UserService;
@@ -75,8 +78,6 @@ public class ServerThread implements Runnable {
                         speakToMe("운행을 종료합니다.");
                         carSocketThread.sendToCar("종료");
                         break;
-                    } else if (inputLine.contains("안녕")) {
-                        speakToMe("안녕하세요. 무엇을 도와드릴까요?");
                     } else if (inputLine.contains("어디")) {
                         // 공유차량의 현재 위치 확인
                         speakToMe("저는 지금 " + car.getCurLoc() + "에 있습니다.");
@@ -96,9 +97,6 @@ public class ServerThread implements Runnable {
                         speakToMe("네, 알겠습니다.");
                         checkRC("학교", destination, command);
 
-                        // 메시지를 RC 카로 전달
-                        carSocketThread.sendToCar(destination);
-                        driveReportService.createReport(user, destination);  // 리포트 생성
                     }
 
                 }
@@ -142,15 +140,33 @@ public class ServerThread implements Runnable {
     /**
      * 사용자 명령에서 목적지 추출하기
      */
-    private String sendAndReceiveTokenMessage(String message) {
+    private String sendAndReceiveTokenMessage(String message) throws JsonProcessingException {
         if (tokenSocketThread != null) {
             String response = tokenSocketThread.sendAndReceiveFromTokenServer(message);
+
             if (response == null) {
-                System.out.println("Connection to Token Server lost. Reconnecting...");
                 tokenSocketThread.reconnectToTokenServer(); // 소켓 재연결
                 return tokenSocketThread.sendAndReceiveFromTokenServer(message);
             } else {
-                return response;
+
+                // ObjectMapper 객체 생성
+                ObjectMapper objectMapper = new ObjectMapper();
+                // JSON 문자열을 객체로 변환
+                ReserveRequestDto reserveRequestDto = objectMapper.readValue(response, ReserveRequestDto.class);
+                String intention = reserveRequestDto.getIntention();
+
+                if (intention.equals("주문")) {
+                    String destination = reserveRequestDto.getDestination();
+
+                    // 메시지를 RC 카로 전달
+                    carSocketThread.sendToCar(destination);
+                    driveReportService.createReport(user, destination);  // 리포트 생성
+                } else if (intention.equals("예약")) {
+                    driveReportService.createReserveReport(user,reserveRequestDto.getDestination(), reserveRequestDto.getTime());
+                }
+
+                return reserveRequestDto.getResponse();
+
             }
         } else {
             System.out.println("TokenSocketThread is not available.");

@@ -2,6 +2,7 @@ package gachicar.gachicarserver.socket;
 
 import gachicar.gachicarserver.service.DriveReportService;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.net.Socket;
  * - RC카 주피터랩 ip 주소: 192.168.0.7
  * - 접속 포트: 9851
  */
+@Slf4j
 public class CarSocketThread implements Runnable {
 
     private final long userId;                          // 사용자 ID
@@ -32,7 +34,7 @@ public class CarSocketThread implements Runnable {
     private void connectToCar() {
         try {
             // RC카의 IP 주소
-            String carIpAddress = "localhost";    // 192.168.0.7
+            String carIpAddress = "192.168.0.7";    // 192.168.0.7
             // RC카의 포트 번호
             int carPort = 9851;
             carSocket = new Socket(carIpAddress, carPort);
@@ -60,7 +62,7 @@ public class CarSocketThread implements Runnable {
                 if (carReader.available() > 0) { // 읽을 데이터가 있는지 확인
                     // 정수로 입력을 직접 읽음
                     int inputInt = carReader.readInt();
-                    System.out.println("Received From RC: " + inputInt);
+                    log.info("Received From RC: {}", inputInt);
 
                     // 여기에 RC카로부터 받은 정수에 대한 작업을 추가합니다.
                     // TODO : RC카 주행 상태에 따라 클라이언트에게 메시지 전달
@@ -95,6 +97,11 @@ public class CarSocketThread implements Runnable {
     public void sendMessageToAndroidClient(String message) {
         // ServerThread의 sendMessageToServer 메서드 호출하여 메시지 전달
         serverThread.sendToAndroidClient(message);
+    }
+
+    public void reconnectToRCServer() {
+        closeCarSocket();
+        connectToCar();
     }
 
     public void closeCarSocket() {
