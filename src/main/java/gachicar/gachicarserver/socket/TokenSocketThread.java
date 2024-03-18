@@ -14,7 +14,13 @@ public class TokenSocketThread implements Runnable {
 
     @Override
     public void run() {
-        connectToTokenServer();
+        try {
+            connectToTokenServer();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeTokenSocket();
+        }
     }
 
     /**

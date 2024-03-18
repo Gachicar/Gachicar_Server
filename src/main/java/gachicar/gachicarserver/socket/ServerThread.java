@@ -73,6 +73,7 @@ public class ServerThread implements Runnable {
                 while ((inputLine = ois.readLine()) != null) {
                     // 클라이언트로부터 메시지 수신
                     System.out.println("Received from Android client: " + inputLine);
+
                     if (inputLine.contains("종료")) {
                         sendToAndroidClient("운행을 종료합니다.");
                         carSocketThread.sendToCar("종료");
@@ -83,6 +84,7 @@ public class ServerThread implements Runnable {
                     } else {
                         // 목적지 토큰 추출해주는 서버에 메시지 전달
                         sendAndReceiveTokenMessage(inputLine);
+//                        carSocketThread.sendToCar(inputLine);
                     }
                 }
             }
