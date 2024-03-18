@@ -1,6 +1,5 @@
 package gachicar.gachicarserver.api;
 
-import gachicar.gachicarserver.config.jwt.CustomUserDetail;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.CurLocationDto;
@@ -11,7 +10,6 @@ import gachicar.gachicarserver.service.CarService;
 import gachicar.gachicarserver.service.SharingService;
 import gachicar.gachicarserver.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,9 +35,9 @@ public class SharingApiController {
      * 차량의 현재 위치 가져오기
      */
     @GetMapping("/loc")
-    public ResultDto<Object> getCurLocation(@AuthenticationPrincipal CustomUserDetail userDetail) {
+    public ResultDto<Object> getCurLocation() {
         try {
-            User user = userService.findUserById(userDetail.getId());
+            User user = userService.findUserById(1L);
             // 사용자의 공유차량 가져오기
             Car car = user.getGroup().getCar();
 
@@ -50,9 +48,9 @@ public class SharingApiController {
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         }
-//        catch (Exception e) {
-//            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
-//        }
+        catch (Exception e) {
+            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
+        }
     }
 
 }

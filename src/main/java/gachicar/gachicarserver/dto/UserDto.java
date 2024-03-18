@@ -10,10 +10,14 @@ import lombok.Getter;
 public class UserDto {
     private Long userId;
     private String userName;
+    private String email;
+    private String role;
 
     public UserDto(User user) {
-        userId = user.getId();
-        userName = user.getName();
+        this.userId = user.getId();
+        this.userName = user.getName();
+        this.email = user.getEmail();
+        this.role = user.getRole().getTitle();
     }
 
     @Getter
