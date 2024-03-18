@@ -1,7 +1,9 @@
 package gachicar.gachicarserver.socket;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum CarMsg {
     END("종료"),

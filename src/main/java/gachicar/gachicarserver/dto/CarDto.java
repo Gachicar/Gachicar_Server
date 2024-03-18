@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class CarDto {
     private String carName; // 등록할 차량 별명
     private String carNumber;   // 등록할 차량 번호
-    private Long nowUser;   // 현재 사용자
+//    private Long nowUser;   // 현재 사용자
     private String location;    // location: 자주 가는 목적지
     private Long driveTime;     // 시간
     private LocalDateTime latestDate;    // 날짜: 차를 최근에 사용한 날짜
@@ -24,7 +24,7 @@ public class CarDto {
     public CarDto(Car car) {
         this.carName = car.getCarName();
         this.carNumber = car.getCarNumber();
-        this.nowUser = car.getNowUser();
+//        this.nowUser = car.getNowUser();
         this.location = car.getLocation();
         this.driveTime = car.getDriveTime();
         this.latestDate = car.getLatestDate();

@@ -104,6 +104,9 @@ public class InitDb {
                 DriveReport driveReport = new DriveReport(newCar, userList[i], diffMin, dateTimes[i], dateTimes[i+6], departure[i], dests[i]);
                 driveReportRepository.save(driveReport);
             }
+
+            newCar.setLatestDate(LocalDateTime.of(2024, 3, 28, 16, 25));
+            newCar.setDriveTime(210L);
         }
     }
 

@@ -45,15 +45,11 @@ public class CarSocketThread implements Runnable {
     }
 
     public void sendToCar(String message) {
-        if (carSocket.isClosed()) {
-            reconnectToRCServer();
+        if (carWriter != null) {
+            carWriter.println(message);
+            System.out.println("Sent to RC car: " + message);
         } else {
-            if (carWriter != null) {
-                carWriter.println(message);
-                System.out.println("Sent to RC car: " + message);
-            } else {
-                System.out.println("Failed to send message to RC car. Car socket is not available.");
-            }
+            System.out.println("Failed to send message to RC car. Car socket is not available.");
         }
     }
 
@@ -82,11 +78,14 @@ public class CarSocketThread implements Runnable {
                     } else if (inputInt == CarMsg.NORMAL.ordinal()) {
                         sendMessageToAndroidClient("정상적으로 주행 중입니다.");
                     } else if (inputInt == CarMsg.HOME.ordinal()) {
-                        sendMessageToAndroidClient(CarMsg.HOME.name() + "에 도착하였습니다.");
+                        sendMessageToAndroidClient(CarMsg.HOME.getDesc() + "에 도착하였습니다.");
+                        break;
                     } else if (inputInt == CarMsg.OFFICE.ordinal()) {
-                        sendMessageToAndroidClient(CarMsg.OFFICE.name() + "에 도착하였습니다.");
+                        sendMessageToAndroidClient(CarMsg.OFFICE.getDesc() + "에 도착하였습니다.");
+                        break;
                     } else if (inputInt == CarMsg.SCHOOL.ordinal()) {
-                        sendMessageToAndroidClient(CarMsg.SCHOOL.name() + "에 도착하였습니다.");
+                        sendMessageToAndroidClient(CarMsg.SCHOOL.getDesc() + "에 도착하였습니다.");
+                        break;
                     }
                 }
             }
