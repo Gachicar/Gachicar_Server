@@ -1,7 +1,9 @@
 package gachicar.gachicarserver.domain;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum ReportStatus {
     RUNNING("주행"),

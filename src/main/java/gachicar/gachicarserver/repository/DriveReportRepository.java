@@ -28,14 +28,15 @@ public class DriveReportRepository {
     }
 
     // 사용자의 가장 최근 주행 리포트 조회
-    public DriveReport findRecentByUser(Long userId) {
+    public DriveReport findRecentByUser(Long userId, ReportStatus type) {
         try {
             String jpql = "SELECT dr FROM DriveReport dr " +
-                    "WHERE dr.user.id = :userId " +
+                    "WHERE dr.user.id = :userId AND dr.type = :type " +
                     "ORDER BY dr.startTime DESC";
 
             return em.createQuery(jpql, DriveReport.class)
                     .setParameter("userId", userId)
+                    .setParameter("type", type)
                     .setMaxResults(1)
                     .getSingleResult();
 
@@ -115,6 +116,5 @@ public class DriveReportRepository {
                 .setMaxResults(1) // 최대 결과를 1개로 제한하여 가장 많은 목적지 1개만 반환합니다.
                 .getSingleResult();
     }
-
 
 }

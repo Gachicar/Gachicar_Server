@@ -50,7 +50,7 @@ public class DriveReportService {
 
     @Transactional
     public void updateReport(Long userId) {
-        DriveReport driveReport = reportRepository.findRecentByUser(userId);
+        DriveReport driveReport = reportRepository.findRecentByUser(userId, ReportStatus.RUNNING);
 
         LocalDateTime endTime = LocalDateTime.now();
         Duration diff = Duration.between(driveReport.getStartTime(), endTime);
@@ -65,7 +65,7 @@ public class DriveReportService {
     }
 
     public ReportDto getRecentReport(Long userId) {
-        DriveReport driveReport = reportRepository.findRecentByUser(userId);
+        DriveReport driveReport = reportRepository.findRecentByUser(userId, ReportStatus.COMPLETE);
         if (driveReport != null) {
             return new ReportDto(driveReport);
         } else {
@@ -130,5 +130,17 @@ public class DriveReportService {
         reportRepository.save(driveReport);
 
         return new ReportDto(driveReport);
+    }
+
+    /**
+     * 최근 예약 리포트 조회
+     */
+    public ReportDto getReserveReport(Long userId) {
+        DriveReport driveReport = reportRepository.findRecentByUser(userId, ReportStatus.RESERVE);
+        if (driveReport != null) {
+            return new ReportDto(driveReport);
+        } else {
+            return null;
+        }
     }
 }

@@ -19,7 +19,6 @@ public class ReportDto {
     private LocalDateTime endTime;
     private String departure;
     private String destination;
-    private String type;
 
     public ReportDto(DriveReport report) {
         this.car = new CarDto(report.getCar());
@@ -29,6 +28,5 @@ public class ReportDto {
         this.endTime = report.getEndTime();
         this.departure = report.getDeparture();
         this.destination = report.getDestination();
-        this.type = report.getType().name();
     }
 }

@@ -46,6 +46,18 @@ public class ReportApiController {
         }
     }
 
+    @GetMapping("/reserve")
+    public ResultDto<Object> getRecentReserveReport() {
+        try {
+            // 사용자의 가장 최근 예약 내역 조회
+            return ResultDto.of(HttpStatusCode.OK, "사용자의 최근 예약 내역 조회 성공", driveReportService.getReserveReport(1L));
+        } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (Exception e) {
+            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
+        }
+    }
+
     /**
      * 그룹 내 최다 사용자 조회
      */
