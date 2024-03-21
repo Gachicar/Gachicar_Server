@@ -107,6 +107,15 @@ public class InitDb {
 
             newCar.setLatestDate(LocalDateTime.of(2024, 3, 28, 16, 25));
             newCar.setDriveTime(210L);
+
+            // 예약 리포트
+            LocalDateTime dateTimeReserve = LocalDateTime.of(2024, 4, 2, 10, 0);
+            DriveReport reserveReport = new DriveReport(newCar, user, dateTimeReserve, "회사");
+            driveReportRepository.save(reserveReport);
+
+            LocalDateTime dateTimeReserve2 = LocalDateTime.of(2024, 4, 1, 13, 0);
+            DriveReport reserveReport2 = new DriveReport(newCar, user2, dateTimeReserve2, "학교");
+            driveReportRepository.save(reserveReport2);
         }
     }
 
