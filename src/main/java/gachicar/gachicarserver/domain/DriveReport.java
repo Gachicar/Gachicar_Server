@@ -33,12 +33,12 @@ public class DriveReport {
 
     private String departure;   // 출발지
 
-    @Setter
     private String destination; // 목적지
 
     @Setter
     private ReportStatus type;    // 주행, 완료, 예약
 
+    // 주행 리포트
     @Builder
     public DriveReport(Car car, User user, LocalDateTime startTime, String departure, String destination) {
         this.car = car;
@@ -60,6 +60,7 @@ public class DriveReport {
         this.type = ReportStatus.COMPLETE;
     }
 
+    // 예약 리포트
     public DriveReport(Car car, User user, LocalDateTime endTime, String destination) {
         this.car = car;
         this.user = user;

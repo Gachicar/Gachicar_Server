@@ -96,7 +96,7 @@ public class InitDb {
             LocalDateTime[] dateTimes = {dateTime1, dateTime2, dateTime3, dateTime4, dateTime5, dateTime6,
                                             dateTime11, dateTime22, dateTime33, dateTime44, dateTime55, dateTime66};
             String[] departure = {"집", "집", "회사", "학교", "집", "학교"};
-            String[] dests = {"회사", "회사", "집", "집", "회사", "회사"};
+            String[] dests = {"회사", "회사", "집", "집", "회사", "집"};
 
             for (int i = 0; i < 6; i++) {
                 Duration diff = Duration.between(dateTimes[i], dateTimes[i+6]);
@@ -107,6 +107,15 @@ public class InitDb {
 
             newCar.setLatestDate(LocalDateTime.of(2024, 3, 28, 16, 25));
             newCar.setDriveTime(210L);
+
+            // 예약 리포트
+            LocalDateTime dateTimeReserve = LocalDateTime.of(2024, 4, 2, 10, 0);
+            DriveReport reserveReport = new DriveReport(newCar, user, dateTimeReserve, "회사");
+            driveReportRepository.save(reserveReport);
+
+            LocalDateTime dateTimeReserve2 = LocalDateTime.of(2024, 4, 1, 13, 0);
+            DriveReport reserveReport2 = new DriveReport(newCar, user2, dateTimeReserve2, "학교");
+            driveReportRepository.save(reserveReport2);
         }
     }
 
