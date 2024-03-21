@@ -33,6 +33,7 @@ public class DriveReport {
 
     private String departure;   // 출발지
 
+    @Setter
     private String destination; // 목적지
 
     @Setter

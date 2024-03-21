@@ -78,6 +78,9 @@ public class ServerThread implements Runnable {
                         sendToAndroidClient("운행을 종료합니다.");
                         carSocketThread.sendToCar("종료");
                         break;
+                    } else if (inputLine.contains("정지")) {
+                        sendToAndroidClient("정지합니다.");
+                        carSocketThread.sendToCar("정지");
                     } else if (inputLine.contains("어디")) {
                         // 공유차량의 현재 위치 확인
                         sendToAndroidClient("저는 지금 " + car.getCurLoc() + "에 있습니다.");
@@ -131,7 +134,6 @@ public class ServerThread implements Runnable {
 //            car.setOilStatus(car.getOilStatus()-5);
 //            driveReportService.createReport(user, response);
 
-
             // ObjectMapper 객체 생성
             ObjectMapper objectMapper = new ObjectMapper();
             // JSON 문자열을 객체로 변환
@@ -140,13 +142,16 @@ public class ServerThread implements Runnable {
 
             if (intention.equals("주문")) {
                 String destination = reserveRequestDto.getDestination();
+                if (destination.equals("")) {
+                    sendToAndroidClient("다시 말씀해주시겠어요?");
+                } else {
+                    // 안드로이드 클라이언트에 응답
+                    sendToAndroidClient(reserveRequestDto.getResponse());
 
-                // 안드로이드 클라이언트에 응답
-                sendToAndroidClient(reserveRequestDto.getResponse());
-
-                // 메시지를 RC 카로 전달
-                carSocketThread.sendToCar(destination);
-                driveReportService.createReport(user, destination);  // 리포트 생성
+                    // 메시지를 RC 카로 전달
+                    carSocketThread.sendToCar(destination);
+                    driveReportService.createReport(user, destination);  // 리포트 생성
+                }
             } else if (intention.equals("예약")) {
                 ReportDto reserveReport = driveReportService.createReserveReport(user, reserveRequestDto.getDestination(), reserveRequestDto.getTime());
 

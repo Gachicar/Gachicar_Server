@@ -96,7 +96,7 @@ public class InitDb {
             LocalDateTime[] dateTimes = {dateTime1, dateTime2, dateTime3, dateTime4, dateTime5, dateTime6,
                                             dateTime11, dateTime22, dateTime33, dateTime44, dateTime55, dateTime66};
             String[] departure = {"집", "집", "회사", "학교", "집", "학교"};
-            String[] dests = {"회사", "회사", "집", "집", "회사", "집"};
+            String[] dests = {"회사", "회사", "집", "집", "회사", "회사"};
 
             for (int i = 0; i < 6; i++) {
                 Duration diff = Duration.between(dateTimes[i], dateTimes[i+6]);
