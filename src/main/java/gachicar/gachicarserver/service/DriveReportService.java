@@ -1,10 +1,10 @@
 package gachicar.gachicarserver.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.DriveReport;
 import gachicar.gachicarserver.domain.ReportStatus;
 import gachicar.gachicarserver.domain.User;
-import gachicar.gachicarserver.dto.CarReportDto;
 import gachicar.gachicarserver.dto.ReportDto;
 import gachicar.gachicarserver.dto.UsageCountsDto;
 import gachicar.gachicarserver.dto.UserDto;
@@ -67,13 +67,8 @@ public class DriveReportService {
     /**
      * 특정 사용자의 최근 주행 리포트 or 최근 예약 내역 조회
      */
-    public CarReportDto getRecentReport(Long userId, ReportStatus type) {
-        DriveReport driveReport = reportRepository.findRecentByUser(userId, type);
-        if (driveReport != null) {
-            return new CarReportDto(driveReport);
-        } else {
-            return null;
-        }
+    public DriveReport getRecentReport(Long userId, ReportStatus type) {
+        return reportRepository.findRecentByUser(userId, type);
     }
 
     /**
@@ -115,7 +110,7 @@ public class DriveReportService {
      * 예약 리포트 생성
      */
     @Transactional
-    public ReportDto createReserveReport(User user, String destination, String timeStr) {
+    public ReportDto createReserveReport(User user, String destination, String timeStr) throws JsonProcessingException {
         int hour = 0;
 
         // 정규 표현식을 사용하여 숫자 부분을 추출
@@ -143,6 +138,22 @@ public class DriveReportService {
         reportRepository.save(driveReport);
 
         return new ReportDto(driveReport);
+    }
+
+
+    @Transactional
+    public void completeDriveReport(Long userId, String dest) {
+        DriveReport recentReport = getRecentReport(userId, ReportStatus.RUNNING);
+        recentReport.setDestination(dest);
+
+        LocalDateTime endTime = LocalDateTime.now();
+        recentReport.setEndTime(endTime);
+
+        Duration diff = Duration.between(recentReport.getStartTime(), endTime);
+        Long diffMin = diff.toMinutes();
+
+        recentReport.setDriveTime(recentReport.getDriveTime()+diffMin);
+        recentReport.setType(ReportStatus.COMPLETE);
     }
 
 

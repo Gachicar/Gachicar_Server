@@ -35,7 +35,8 @@ public class ReportApiController {
     public ResultDto<Object> getDriveReport() {
         try {
             // 주행기록 조회
-            return ResultDto.of(HttpStatusCode.OK, "사용자의 주행 리포트 조회 성공", driveReportService.getRecentReport(1L, ReportStatus.COMPLETE));
+            CarReportDto carReportDto = new CarReportDto(driveReportService.getRecentReport(1L, ReportStatus.COMPLETE));
+            return ResultDto.of(HttpStatusCode.OK, "사용자의 주행 리포트 조회 성공", carReportDto);
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
@@ -47,7 +48,8 @@ public class ReportApiController {
     public ResultDto<Object> getRecentReserveReport() {
         try {
             // 사용자의 가장 최근 예약 내역 조회
-            return ResultDto.of(HttpStatusCode.OK, "사용자의 최근 예약 내역 조회 성공", driveReportService.getRecentReport(1L, ReportStatus.RESERVE));
+            CarReportDto carReportDto = new CarReportDto(driveReportService.getRecentReport(1L, ReportStatus.RESERVE));
+            return ResultDto.of(HttpStatusCode.OK, "사용자의 최근 예약 내역 조회 성공", carReportDto);
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
