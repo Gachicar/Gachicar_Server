@@ -38,7 +38,7 @@ public class ReportApiController {
     public ResultDto<Object> getDriveReport() {
         try {
             // 주행기록 조회
-            return ResultDto.of(HttpStatusCode.OK, "사용자의 주행 리포트 조회 성공", driveReportService.getRecentReport(1L));
+            return ResultDto.of(HttpStatusCode.OK, "사용자의 주행 리포트 조회 성공", new ReportDto(driveReportService.getRecentReport(1L)));
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {

@@ -64,10 +64,10 @@ public class DriveReportService {
         carService.updateCarStatus(driveReport, reportRepository.getFavoriteDestination(driveReport.getCar().getId()));
     }
 
-    public ReportDto getRecentReport(Long userId) {
+    public DriveReport getRecentReport(Long userId) {
         DriveReport driveReport = reportRepository.findRecentByUser(userId, ReportStatus.COMPLETE);
         if (driveReport != null) {
-            return new ReportDto(driveReport);
+            return driveReport;
         } else {
             return null;
         }
@@ -142,5 +142,20 @@ public class DriveReportService {
         } else {
             return null;
         }
+    }
+
+    @Transactional
+    public void completeDriveReport(Long userId, String dest) {
+        DriveReport recentReport = getRecentReport(userId);
+        recentReport.setDestination(dest);
+
+        LocalDateTime endTime = LocalDateTime.now();
+        recentReport.setEndTime(endTime);
+
+        Duration diff = Duration.between(recentReport.getStartTime(), endTime);
+        Long diffMin = diff.toMinutes();
+
+        recentReport.setDriveTime(recentReport.getDriveTime()+diffMin);
+        recentReport.setType(ReportStatus.COMPLETE);
     }
 }

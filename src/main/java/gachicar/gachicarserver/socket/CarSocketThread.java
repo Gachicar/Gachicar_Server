@@ -34,7 +34,7 @@ public class CarSocketThread implements Runnable {
     private void connectToCar() {
         try {
             // RC카의 IP 주소
-            String carIpAddress = "192.168.0.7";    // 192.168.0.7
+            String carIpAddress = "localhost";    // 192.168.0.7
             // RC카의 포트 번호
             int carPort = 9851;
             carSocket = new Socket(carIpAddress, carPort);
@@ -79,21 +79,26 @@ public class CarSocketThread implements Runnable {
                         sendMessageToAndroidClient("정상적으로 주행 중입니다.");
                     } else if (inputInt == CarMsg.HOME.ordinal()) {
                         sendMessageToAndroidClient(CarMsg.HOME.getDesc() + "에 도착하였습니다.");
-                        break;
+                        driveReportService.completeDriveReport(userId, CarMsg.HOME.getDesc());
+//                        break;
                     } else if (inputInt == CarMsg.OFFICE.ordinal()) {
                         sendMessageToAndroidClient(CarMsg.OFFICE.getDesc() + "에 도착하였습니다.");
-                        break;
+                        driveReportService.completeDriveReport(userId, CarMsg.OFFICE.getDesc());
+//                        break;
                     } else if (inputInt == CarMsg.SCHOOL.ordinal()) {
                         sendMessageToAndroidClient(CarMsg.SCHOOL.getDesc() + "에 도착하였습니다.");
-                        break;
+                        driveReportService.completeDriveReport(userId, CarMsg.SCHOOL.getDesc());
+
+//                        break;
                     }
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            closeCarSocket(); // 소켓 닫기
         }
+//        finally {
+//            closeCarSocket(); // 소켓 닫기
+//        }
     }
 
     // ServerThread로 메시지를 전달하는 메서드 추가
@@ -101,6 +106,7 @@ public class CarSocketThread implements Runnable {
         // ServerThread의 sendMessageToServer 메서드 호출하여 메시지 전달
         serverThread.sendToAndroidClient(message);
     }
+
 
     public void reconnectToRCServer() {
         closeCarSocket();
