@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 public class ReportDto {
+    private CarDto car;
     private String userName;
     private Long driveTime;
     private LocalDateTime startTime;
@@ -20,6 +21,7 @@ public class ReportDto {
     private String destination;
 
     public ReportDto(DriveReport report) {
+        this.car = new CarDto(report.getCar());
         this.userName = report.getUser().getName();
         this.driveTime = report.getDriveTime();
         this.startTime = report.getStartTime();

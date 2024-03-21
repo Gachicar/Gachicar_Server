@@ -49,10 +49,9 @@ public class DriveReportRepository {
     public User findUserWithMostUsageForCar(Long carId) {
         try {
             return em.createQuery("SELECT dr.user FROM DriveReport dr " +
-                    "WHERE dr.car.id = :carId AND dr.type = :type " +
+                    "WHERE dr.car.id = :carId " +
                     "GROUP BY dr.user ORDER BY COUNT(dr.user) DESC", User.class)
                     .setParameter("carId", carId)
-                    .setParameter("type", ReportStatus.COMPLETE)
                     .setMaxResults(1)
                     .getSingleResult();
         } catch (NoResultException e) {
@@ -64,10 +63,9 @@ public class DriveReportRepository {
     public List<UsageCountsDto> getUserUsageCountsForCar(Long carId) {
         try {
             List<Object[]> results = em.createQuery("SELECT dr.user, COUNT(dr) FROM DriveReport dr " +
-                            "WHERE dr.car.id = :carId AND dr.type = :type " +
+                            "WHERE dr.car.id = :carId " +
                             "GROUP BY dr.user", Object[].class)
                     .setParameter("carId", carId)
-                    .setParameter("type", ReportStatus.COMPLETE)
                     .getResultList();
 
             List<UsageCountsDto> countsDtoList = new ArrayList<>();
@@ -84,34 +82,18 @@ public class DriveReportRepository {
         }
     }
 
-    // 특정 사용자의 주행 리포트 또는 예약 내역 전체 조회
-    public List<DriveReport> findAllByUser(Long userId, ReportStatus type) {
+    // 특정 사용자의 주행 리포트 전체 조회
+    public List<DriveReport> findAllByUser(Long userId) {
         try {
             return em.createQuery(
                             "SELECT dr FROM DriveReport dr " +
-                                    "WHERE dr.user.id = :userId AND dr.type = :type", DriveReport.class)
+                                    "WHERE dr.user.id = :userId", DriveReport.class)
                     .setParameter("userId", userId)
-                    .setParameter("type", type)
                     .getResultList();
         } catch (NoResultException e) {
             return null;
         }
     }
-
-    // 특정 그룹의 주행 리포트 또는 예약 내역 전체 조회
-    public List<DriveReport> findAllByGroup(Long carId, ReportStatus type) {
-        try {
-            return em.createQuery(
-                            "SELECT dr FROM DriveReport dr " +
-                                    "WHERE dr.car.id = :carId AND dr.type = :type", DriveReport.class)
-                    .setParameter("carId", carId)
-                    .setParameter("type", type)
-                    .getResultList();
-        } catch (NoResultException e) {
-            return null;
-        }
-    }
-
 
     // 같은 시간에 예약한 사용자가 있는지 확인
     public boolean existsByEndTimeAndUserCar(LocalDateTime endTime, Car car) {
@@ -127,11 +109,10 @@ public class DriveReportRepository {
     public String getFavoriteDestination(Long carId) {
         return (String) em.createQuery("SELECT d.destination " +
                         "FROM DriveReport d " +
-                        "WHERE d.car.id = :carId AND d.type = :type " +
+                        "WHERE d.car.id = :carId " +
                         "GROUP BY d.destination " +
                         "ORDER BY COUNT(d.destination) DESC")
                 .setParameter("carId", carId)
-                .setParameter("type", ReportStatus.COMPLETE)
                 .setMaxResults(1) // 최대 결과를 1개로 제한하여 가장 많은 목적지 1개만 반환합니다.
                 .getSingleResult();
     }

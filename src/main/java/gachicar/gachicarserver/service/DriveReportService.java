@@ -1,10 +1,10 @@
 package gachicar.gachicarserver.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.DriveReport;
 import gachicar.gachicarserver.domain.ReportStatus;
 import gachicar.gachicarserver.domain.User;
-import gachicar.gachicarserver.dto.CarReportDto;
 import gachicar.gachicarserver.dto.ReportDto;
 import gachicar.gachicarserver.dto.UsageCountsDto;
 import gachicar.gachicarserver.dto.UserDto;
@@ -64,13 +64,10 @@ public class DriveReportService {
         carService.updateCarStatus(driveReport, reportRepository.getFavoriteDestination(driveReport.getCar().getId()));
     }
 
-    /**
-     * 특정 사용자의 최근 주행 리포트 or 최근 예약 내역 조회
-     */
-    public CarReportDto getRecentReport(Long userId, ReportStatus type) {
-        DriveReport driveReport = reportRepository.findRecentByUser(userId, type);
+    public DriveReport getRecentReport(Long userId) {
+        DriveReport driveReport = reportRepository.findRecentByUser(userId, ReportStatus.COMPLETE);
         if (driveReport != null) {
-            return new CarReportDto(driveReport);
+            return driveReport;
         } else {
             return null;
         }
@@ -92,20 +89,10 @@ public class DriveReportService {
     }
 
     /**
-     * 사용자의 모든 주행 기록 or 예약 내역 조회
+     * 사용자의 모든 주행 기록 조회
      */
-    public List<ReportDto> getAllReportsByUser(Long userId, ReportStatus type) {
-        List<DriveReport> driveReports = reportRepository.findAllByUser(userId, type);
-        return driveReports.stream()
-                .map(ReportDto::new)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 그룹의 모든 주행 기록 or 예약 내역 조회
-     */
-    public List<ReportDto> getAllReportsByGroup(Long carId, ReportStatus type) {
-        List<DriveReport> driveReports = reportRepository.findAllByGroup(carId, type);
+    public List<ReportDto> getAllReportsByUser(Long userId) {
+        List<DriveReport> driveReports = reportRepository.findAllByUser(userId);
         return driveReports.stream()
                 .map(ReportDto::new)
                 .collect(Collectors.toList());
@@ -115,7 +102,7 @@ public class DriveReportService {
      * 예약 리포트 생성
      */
     @Transactional
-    public ReportDto createReserveReport(User user, String destination, String timeStr) {
+    public ReportDto createReserveReport(User user, String destination, String timeStr) throws JsonProcessingException {
         int hour = 0;
 
         // 정규 표현식을 사용하여 숫자 부분을 추출
@@ -145,5 +132,30 @@ public class DriveReportService {
         return new ReportDto(driveReport);
     }
 
+    /**
+     * 최근 예약 리포트 조회
+     */
+    public ReportDto getReserveReport(Long userId) {
+        DriveReport driveReport = reportRepository.findRecentByUser(userId, ReportStatus.RESERVE);
+        if (driveReport != null) {
+            return new ReportDto(driveReport);
+        } else {
+            return null;
+        }
+    }
 
+    @Transactional
+    public void completeDriveReport(Long userId, String dest) {
+        DriveReport recentReport = getRecentReport(userId);
+        recentReport.setDestination(dest);
+
+        LocalDateTime endTime = LocalDateTime.now();
+        recentReport.setEndTime(endTime);
+
+        Duration diff = Duration.between(recentReport.getStartTime(), endTime);
+        Long diffMin = diff.toMinutes();
+
+        recentReport.setDriveTime(recentReport.getDriveTime()+diffMin);
+        recentReport.setType(ReportStatus.COMPLETE);
+    }
 }
