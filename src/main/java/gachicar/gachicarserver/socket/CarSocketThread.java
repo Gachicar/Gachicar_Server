@@ -65,7 +65,6 @@ public class CarSocketThread implements Runnable {
                     log.info("Received From RC: {}", inputInt);
 
                     // 여기에 RC카로부터 받은 정수에 대한 작업을 추가합니다.
-                    // TODO : RC카 주행 상태에 따라 클라이언트에게 메시지 전달
                     if (inputInt == CarMsg.END.ordinal()) {
                         driveReportService.updateReport(userId);
                         sendMessageToAndroidClient("주행을 종료합니다.");

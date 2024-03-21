@@ -1,6 +1,5 @@
 package gachicar.gachicarserver.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.DriveReport;
 import gachicar.gachicarserver.domain.ReportStatus;
