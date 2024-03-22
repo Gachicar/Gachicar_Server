@@ -5,6 +5,9 @@ import gachicar.gachicarserver.domain.User;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Data
 @RequiredArgsConstructor
 public class GroupDto {
@@ -14,6 +17,7 @@ public class GroupDto {
     private String desc;
     private ManagerDto groupManager; // 그룹장
     private CarDto car;    // 공유차량
+    private List<UserDto> memberList;
 
     public GroupDto(Group group) {
         this.groupId = group.getGroupId();
@@ -21,6 +25,9 @@ public class GroupDto {
         this.desc = group.getDesc();
         this.groupManager = new ManagerDto(group.getManager());
         this.car = new CarDto(group.getCar());
+        this.memberList = group.getMemberList().stream()
+                .map(UserDto::new)
+                .collect(Collectors.toList());
     }
 }
 
