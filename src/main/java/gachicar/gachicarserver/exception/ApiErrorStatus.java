@@ -9,6 +9,11 @@ import lombok.Getter;
 public enum ApiErrorStatus {
 
     /**
+     * 사용자 Api 관련 에러 코드
+     */
+    DUPLICATED_USER_NAME(HttpStatusCode.BAD_REQUEST, "중복된 닉네임입니다."),
+
+    /**
      * 그룹 Api 관련 에러 코드
      */
     NOT_MANAGER(HttpStatusCode.UNAUTHORIZED, "그룹장만 수정할 수 있습니다."),

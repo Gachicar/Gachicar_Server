@@ -40,8 +40,13 @@ public class UserService {
     @Transactional
     /* 회원 닉네임 변경 */
     public void update(Long userId, UpdateUserNicknameRequestDto updateUserNicknameRequestDto) {
-        User user = userRepository.findOne(userId);
-        user.setName(updateUserNicknameRequestDto.getUserNickname());
+        String newName = updateUserNicknameRequestDto.getUserNickname();
+        if (userRepository.findByName(newName).isEmpty()) {
+            User user = userRepository.findOne(userId);
+            user.setName(newName);
+        } else {
+            throw new ApiErrorException(ApiErrorStatus.DUPLICATED_USER_NAME);
+        }
     }
 
     @Transactional
