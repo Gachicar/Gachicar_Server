@@ -61,6 +61,9 @@ public class UserService {
     public void updateGroup(User user, Group group) {
         user.setGroup(group);
         user.setRole(Role.MANAGER);
+        List<User> memberList = group.getMemberList();
+        memberList.add(user);
+        group.setMemberList(memberList);
     }
 
     @Transactional
