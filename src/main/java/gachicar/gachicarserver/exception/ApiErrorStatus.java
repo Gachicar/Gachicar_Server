@@ -12,6 +12,7 @@ public enum ApiErrorStatus {
      * 사용자 Api 관련 에러 코드
      */
     DUPLICATED_USER_NAME(HttpStatusCode.BAD_REQUEST, "중복된 닉네임입니다."),
+    NOT_EXIST_NAME(HttpStatusCode.BAD_REQUEST, "존재하지 않는 닉네임입니다."),
 
     /**
      * 그룹 Api 관련 에러 코드

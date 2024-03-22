@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -77,6 +78,13 @@ public class InitDb {
 
             user2.setGroup(newGroup);
             user3.setGroup(newGroup);
+
+            // 그룹 멤버 리스트에 추가
+            List<User> memberList = newGroup.getMemberList();
+            memberList.add(user);
+            memberList.add(user2);
+            memberList.add(user3);
+            newGroup.setMemberList(memberList);
 
             LocalDateTime dateTime1 = LocalDateTime.of(2024, 3, 15, 10, 30);
             LocalDateTime dateTime2 = LocalDateTime.of(2024, 3, 28, 15, 45);

@@ -20,6 +20,7 @@ public class Group {
     @Setter
     private String desc;
 
+    @Setter
     @OneToMany
     private List<User> memberList = new ArrayList<>();
 
