@@ -5,6 +5,7 @@ import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.ResultDto;
 import gachicar.gachicarserver.dto.UserDto;
 import gachicar.gachicarserver.dto.requestDto.UpdateUserNicknameRequestDto;
+import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.HttpStatusCode;
 import gachicar.gachicarserver.service.UserService;
@@ -32,8 +33,16 @@ public class UserApiController {
 
     @PatchMapping("/api/user")
     public ResultDto<Object> updateUserNickname(@RequestBody UpdateUserNicknameRequestDto updateUserNicknameRequestDto) {
-        userService.update(1L, updateUserNicknameRequestDto);
-        return ResultDto.of(HttpStatusCode.OK, "사용자 닉네임 설정 성공", null);
+        try {
+            userService.update(1L, updateUserNicknameRequestDto);
+            return ResultDto.of(HttpStatusCode.CREATED, "사용자 닉네임 설정 성공", null);
+        } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (Exception e) {
+            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
+        }
     }
 
     @DeleteMapping("/api/user")

@@ -2,16 +2,12 @@ package gachicar.gachicarserver.dto;
 
 import gachicar.gachicarserver.domain.DriveReport;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * 주행 리포트 DTO
- */
 @Data
-@NoArgsConstructor
-public class ReportDto {
+public class CarReportDto {
+    private CarDto car;
     private String userName;
     private Long driveTime;
     private LocalDateTime startTime;
@@ -19,7 +15,8 @@ public class ReportDto {
     private String departure;
     private String destination;
 
-    public ReportDto(DriveReport report) {
+    public CarReportDto(DriveReport report) {
+        this.car = new CarDto(report.getCar());
         this.userName = report.getUser().getName();
         this.driveTime = report.getDriveTime();
         this.startTime = report.getStartTime();

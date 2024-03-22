@@ -64,13 +64,11 @@ public class DriveReportService {
         carService.updateCarStatus(driveReport, reportRepository.getFavoriteDestination(driveReport.getCar().getId()));
     }
 
-    public DriveReport getRecentReport(Long userId) {
-        DriveReport driveReport = reportRepository.findRecentByUser(userId, ReportStatus.COMPLETE);
-        if (driveReport != null) {
-            return driveReport;
-        } else {
-            return null;
-        }
+    /**
+     * 특정 사용자의 최근 주행 리포트 or 최근 예약 내역 조회
+     */
+    public DriveReport getRecentReport(Long userId, ReportStatus type) {
+        return reportRepository.findRecentByUser(userId, type);
     }
 
     /**
@@ -89,10 +87,20 @@ public class DriveReportService {
     }
 
     /**
-     * 사용자의 모든 주행 기록 조회
+     * 사용자의 모든 주행 기록 or 예약 내역 조회
      */
-    public List<ReportDto> getAllReportsByUser(Long userId) {
-        List<DriveReport> driveReports = reportRepository.findAllByUser(userId);
+    public List<ReportDto> getAllReportsByUser(Long userId, ReportStatus type) {
+        List<DriveReport> driveReports = reportRepository.findAllByUser(userId, type);
+        return driveReports.stream()
+                .map(ReportDto::new)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 그룹의 모든 주행 기록 or 예약 내역 조회
+     */
+    public List<ReportDto> getAllReportsByGroup(Long carId, ReportStatus type) {
+        List<DriveReport> driveReports = reportRepository.findAllByGroup(carId, type);
         return driveReports.stream()
                 .map(ReportDto::new)
                 .collect(Collectors.toList());
@@ -132,21 +140,10 @@ public class DriveReportService {
         return new ReportDto(driveReport);
     }
 
-    /**
-     * 최근 예약 리포트 조회
-     */
-    public ReportDto getReserveReport(Long userId) {
-        DriveReport driveReport = reportRepository.findRecentByUser(userId, ReportStatus.RESERVE);
-        if (driveReport != null) {
-            return new ReportDto(driveReport);
-        } else {
-            return null;
-        }
-    }
 
     @Transactional
     public void completeDriveReport(Long userId, String dest) {
-        DriveReport recentReport = getRecentReport(userId);
+        DriveReport recentReport = getRecentReport(userId, ReportStatus.RUNNING);
         recentReport.setDestination(dest);
 
         LocalDateTime endTime = LocalDateTime.now();
@@ -158,4 +155,6 @@ public class DriveReportService {
         recentReport.setDriveTime(recentReport.getDriveTime()+diffMin);
         recentReport.setType(ReportStatus.COMPLETE);
     }
+
+
 }

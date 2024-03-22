@@ -134,6 +134,7 @@ public class ServerThread implements Runnable {
 //            car.setOilStatus(car.getOilStatus()-5);
 //            driveReportService.createReport(user, response);
 
+
             // ObjectMapper 객체 생성
             ObjectMapper objectMapper = new ObjectMapper();
             // JSON 문자열을 객체로 변환
