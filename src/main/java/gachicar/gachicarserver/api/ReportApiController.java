@@ -5,6 +5,7 @@ import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.ReportStatus;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.*;
+import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.HttpStatusCode;
 import gachicar.gachicarserver.service.CarService;
@@ -41,6 +42,8 @@ public class ReportApiController {
             return ResultDto.of(HttpStatusCode.OK, "사용자의 주행 리포트 조회 성공", carReportDto);
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
         }
@@ -53,6 +56,8 @@ public class ReportApiController {
             CarReportDto carReportDto = new CarReportDto(driveReportService.getRecentReport(userDetail.getId(), ReportStatus.RESERVE));
             return ResultDto.of(HttpStatusCode.OK, "사용자의 최근 예약 내역 조회 성공", carReportDto);
         } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
@@ -72,6 +77,8 @@ public class ReportApiController {
             return ResultDto.of(HttpStatusCode.OK, "그룹 내 최다 사용자 조회 성공", mostUserInGroupReport);
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
         }
@@ -89,6 +96,8 @@ public class ReportApiController {
             List<UsageCountsDto> userUsageCounts = driveReportService.getUserUsageCounts(car.getId());
             return ResultDto.of(HttpStatusCode.OK, "그룹원별 공유차량 사용 횟수 조회 성공", userUsageCounts);
         } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
@@ -111,6 +120,8 @@ public class ReportApiController {
             return ResultDto.of(HttpStatusCode.OK, "사용자의 전체 주행기록 조회 성공", reportListDto);
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
         }
@@ -130,6 +141,8 @@ public class ReportApiController {
 
             return ResultDto.of(HttpStatusCode.OK, "사용자의 전체 예약내역 조회 성공", reportListDto);
         } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
@@ -151,6 +164,8 @@ public class ReportApiController {
 
             return ResultDto.of(HttpStatusCode.OK, "그룹의 전체 예약내역 조회 성공", reportListDto);
         } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);

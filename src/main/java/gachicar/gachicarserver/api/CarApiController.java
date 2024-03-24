@@ -6,6 +6,7 @@ import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.CarDto;
 import gachicar.gachicarserver.dto.CarFuelDto;
 import gachicar.gachicarserver.dto.ResultDto;
+import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.HttpStatusCode;
 import gachicar.gachicarserver.service.CarService;
@@ -36,8 +37,9 @@ public class CarApiController {
 
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
-        }
-        catch (Exception e) {
+        } catch (ApiErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
         }
     }
@@ -55,8 +57,9 @@ public class CarApiController {
             return ResultDto.of(HttpStatusCode.OK, "공유차량 정보 조회 성공", new CarDto(car));
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
-        }
-        catch (Exception e) {
+        } catch (ApiErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
         }
     }
@@ -73,9 +76,10 @@ public class CarApiController {
             return ResultDto.of(HttpStatusCode.OK, "공유차량 연료 조회 성공", new CarFuelDto(car));
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (Exception e) {
+            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
         }
-//        catch (Exception e) {
-//            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
-//        }
     }
 }
