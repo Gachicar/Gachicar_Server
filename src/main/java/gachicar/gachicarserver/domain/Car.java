@@ -24,7 +24,7 @@ public class Car {
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
-    private Group group;   // 공유차량이 속한 그룹
+    private GroupEntity group;   // 공유차량이 속한 그룹
 
     @Setter
     private Boolean carStatus = Boolean.FALSE;  // 사용중 TRUE / 사용 가능 FALSE
@@ -55,7 +55,7 @@ public class Car {
     private String curLoc = "집";      // 현재 위치
 
     @Builder
-    public Car(String name, String number, Group group) {
+    public Car(String name, String number, GroupEntity group) {
         this.carName = name;
         this.carNumber = number;
         this.group = group;

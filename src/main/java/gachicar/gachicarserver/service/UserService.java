@@ -1,6 +1,6 @@
 package gachicar.gachicarserver.service;
 
-import gachicar.gachicarserver.domain.Group;
+import gachicar.gachicarserver.domain.GroupEntity;
 import gachicar.gachicarserver.domain.Role;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.requestDto.DeleteGroupRequestDto;
@@ -67,7 +67,7 @@ public class UserService {
 
     @Transactional
     /* 그룹 변경 */
-    public void updateGroup(User user, Group group) {
+    public void updateGroup(User user, GroupEntity group) {
         user.setGroup(group);
         user.setRole(Role.MANAGER);
         List<User> memberList = group.getMemberList();
@@ -78,7 +78,7 @@ public class UserService {
     @Transactional
     /* 그룹 삭제 */
     public void deleteGroup(User user, DeleteGroupRequestDto requestDto) {
-        Group group = user.getGroup();
+        GroupEntity group = user.getGroup();
 
         if (group != null) {
             if (requestDto.getDeleteId() != null) {

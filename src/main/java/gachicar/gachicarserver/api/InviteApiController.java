@@ -31,7 +31,7 @@ public class InviteApiController {
     @PostMapping
     public ResultDto<Object> inviteMemberByNickname(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody InviteMemberRequestDto requestDto) {
         try {
-            User user = userService.findUserById(1L);
+            User user = userService.findUserById(userDetail.getId());
             inviteService.inviteMemberByNickname(user, user.getGroup(), requestDto);
 
             return ResultDto.of(HttpStatusCode.OK, "멤버 초대 성공", null);
@@ -50,7 +50,7 @@ public class InviteApiController {
     @PostMapping("/accept")
     public ResultDto<Object> acceptInvitation(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody AcceptInvitationRequestDto requestDto) {
         try {
-            User user = userService.findUserById(4L);
+            User user = userService.findUserById(userDetail.getId());
             inviteService.acceptInvitation(user, requestDto);
 
             return ResultDto.of(HttpStatusCode.OK, "초대 수락 알림 전송 완료", null);

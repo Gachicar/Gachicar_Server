@@ -39,13 +39,13 @@ public class InitDb {
             // 사용자 생성
             User user = User.builder()
                     .name("이연수")
-                    .email("bestdustn@naver.com")
+                    .email("bestdustn@sm.ac.kr")
                     .build();
             user.setRole(Role.MANAGER);
             userRepository.save(user);
 
             // 그룹 생성
-            Group newGroup = Group.builder()
+            GroupEntity newGroup = GroupEntity.builder()
                     .name("연수네그룹")
                     .desc("졸프 파이팅!")
                     .manager(user)

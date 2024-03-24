@@ -1,6 +1,6 @@
 package gachicar.gachicarserver.service;
 
-import gachicar.gachicarserver.domain.Group;
+import gachicar.gachicarserver.domain.GroupEntity;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.InviteResponse;
 import gachicar.gachicarserver.dto.requestDto.AcceptInvitationRequestDto;
@@ -24,7 +24,7 @@ public class InviteService {
     /**
      * 닉네임으로 멤버 초대 알림 보내기
      */
-    public void inviteMemberByNickname(User manager, Group group, InviteMemberRequestDto inviteMemberRequestDto) {
+    public void inviteMemberByNickname(User manager, GroupEntity group, InviteMemberRequestDto inviteMemberRequestDto) {
         String memberNickname = inviteMemberRequestDto.getNickname();
 
         User user = userService.findByUserName(memberNickname);
@@ -44,7 +44,7 @@ public class InviteService {
     public void acceptInvitation(User user, AcceptInvitationRequestDto requestDto) {
         // 초대를 수락할 그룹
         Long groupId = requestDto.getGroupId();
-        Group group = groupService.findById(groupId);
+        GroupEntity group = groupService.findById(groupId);
 
         // 초대 수락
         user.setGroup(group);

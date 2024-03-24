@@ -2,7 +2,7 @@ package gachicar.gachicarserver.service;
 
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.DriveReport;
-import gachicar.gachicarserver.domain.Group;
+import gachicar.gachicarserver.domain.GroupEntity;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.CarDto;
 import gachicar.gachicarserver.exception.ApiErrorException;
@@ -31,7 +31,7 @@ public class CarService {
     @Transactional
     public Car createCar(CarDto carDto, User user) {
 
-        Group group = user.getGroup();
+        GroupEntity group = user.getGroup();
 
         String carNum = carDto.getCarNumber();
         Car car = carRepository.findByNumber(carNum);

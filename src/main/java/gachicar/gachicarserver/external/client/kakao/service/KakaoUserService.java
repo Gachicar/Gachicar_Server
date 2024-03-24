@@ -12,6 +12,7 @@ import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.AuthErrorStatus;
 import gachicar.gachicarserver.external.client.kakao.dto.KakaoUserInfo;
 import gachicar.gachicarserver.repository.UserRepository;
+import gachicar.gachicarserver.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -32,6 +33,7 @@ public class KakaoUserService {
 
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
+    private final NotificationService notificationService;
 
     /**
      * 카카오 액세스 토큰으로 카카오 사용자 정보 받아오는 메서드
@@ -103,6 +105,9 @@ public class KakaoUserService {
                         .email(kakaoUserInfo.getEmail())
                         .build();
         userRepository.save(newUser);
+
+        notificationService.connectNotification(newUser.getName());
+
         log.info("join 성공 = {}", newUser.getName());
         return newUser;
     }

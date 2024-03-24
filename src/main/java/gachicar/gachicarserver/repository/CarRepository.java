@@ -1,11 +1,8 @@
 package gachicar.gachicarserver.repository;
 
 import gachicar.gachicarserver.domain.Car;
-import gachicar.gachicarserver.domain.Group;
-import gachicar.gachicarserver.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
