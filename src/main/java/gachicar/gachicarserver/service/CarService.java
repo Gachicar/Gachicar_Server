@@ -73,6 +73,8 @@ public class CarService {
         car.setDriveTime(car.getDriveTime() + driveReport.getDriveTime());
         car.setNowUser(null);
         car.setLatestDate(driveReport.getEndTime());
+        car.setOilStatus(car.getOilStatus()-5);
+        car.setDistance(car.getDistance() + car.getDriveTime()*50);
 
         car.setLocation(favoriteDest);
     }

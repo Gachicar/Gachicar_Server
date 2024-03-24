@@ -201,6 +201,8 @@ public class DriveReportService {
 
         recentReport.setDriveTime(recentReport.getDriveTime()+diffMin);
         recentReport.setType(ReportStatus.COMPLETE);
+
+        carService.updateCarStatus(recentReport, reportRepository.getFavoriteDestination(recentReport.getCar().getId()));
     }
 
     /**
