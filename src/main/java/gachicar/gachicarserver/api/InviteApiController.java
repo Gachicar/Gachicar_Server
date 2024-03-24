@@ -1,8 +1,10 @@
 package gachicar.gachicarserver.api;
 
 import gachicar.gachicarserver.domain.User;
+import gachicar.gachicarserver.dto.requestDto.AcceptInvitationRequestDto;
 import gachicar.gachicarserver.dto.ResultDto;
 import gachicar.gachicarserver.dto.requestDto.InviteMemberRequestDto;
+import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.HttpStatusCode;
 import gachicar.gachicarserver.service.InviteService;
@@ -28,10 +30,31 @@ public class InviteApiController {
     public ResultDto<Object> inviteMemberByNickname(@RequestBody InviteMemberRequestDto requestDto) {
         try {
             User user = userService.findUserById(1L);
-            inviteService.inviteMemberByNickname(user.getGroup(), requestDto);
+            inviteService.inviteMemberByNickname(user, user.getGroup(), requestDto);
 
             return ResultDto.of(HttpStatusCode.OK, "멤버 초대 성공", null);
         } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (Exception e) {
+            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
+        }
+    }
+
+    /**
+     * 그룹 초대 수락
+     */
+    @PostMapping("/accept")
+    public ResultDto<Object> acceptInvitation(@RequestBody AcceptInvitationRequestDto requestDto) {
+        try {
+            User user = userService.findUserById(4L);
+            inviteService.acceptInvitation(user, requestDto);
+
+            return ResultDto.of(HttpStatusCode.OK, "초대 수락 알림 전송 완료", null);
+        } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);

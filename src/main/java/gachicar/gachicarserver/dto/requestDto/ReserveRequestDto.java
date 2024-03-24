@@ -9,6 +9,7 @@ public class ReserveRequestDto {
     private String intention;
     private String response;
     private String destination;
-    private String time;
-    private String command;
+    private String date;
+    private String hour;
+    private String minute;
 }
