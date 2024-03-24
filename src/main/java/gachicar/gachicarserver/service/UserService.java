@@ -38,12 +38,11 @@ public class UserService {
     }
 
     public User findByUserName(String nickname) {
-        try {
-            List<User> userList = userRepository.findByName(nickname);
-            return userList.get(1);
-        } catch (Exception e) {
+        List<User> userList = userRepository.findByName(nickname);
+        if (userList.isEmpty()) {
             throw new AuthErrorException(AuthErrorStatus.GET_USER_FAILED);
         }
+        return userList.get(0); // 리스트가 비어있지 않으면 첫 번째 요소를 반환
     }
 
     @Transactional
