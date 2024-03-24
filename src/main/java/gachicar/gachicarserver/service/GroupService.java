@@ -74,4 +74,8 @@ public class GroupService {
     public void updateGroupCar(Group group, Car car) {
         group.setCar(car);
     }
+
+    public Group findById(Long groupId) {
+        return groupRepository.findById(groupId);
+    }
 }

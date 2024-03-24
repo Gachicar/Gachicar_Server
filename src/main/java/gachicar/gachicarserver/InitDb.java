@@ -76,6 +76,12 @@ public class InitDb {
                     .build();
             userRepository.save(user3);
 
+            User user4 = User.builder()
+                    .name("아무개")
+                    .email("someone@sm.ac.kr")
+                    .build();
+            userRepository.save(user4);
+
             user2.setGroup(newGroup);
             user3.setGroup(newGroup);
 
