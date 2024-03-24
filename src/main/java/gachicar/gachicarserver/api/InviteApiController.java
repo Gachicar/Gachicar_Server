@@ -1,5 +1,6 @@
 package gachicar.gachicarserver.api;
 
+import gachicar.gachicarserver.config.jwt.CustomUserDetail;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.requestDto.AcceptInvitationRequestDto;
 import gachicar.gachicarserver.dto.ResultDto;
@@ -10,6 +11,7 @@ import gachicar.gachicarserver.exception.HttpStatusCode;
 import gachicar.gachicarserver.service.InviteService;
 import gachicar.gachicarserver.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +29,7 @@ public class InviteApiController {
      * 초대할 멤버의 닉네임으로 초대
      */
     @PostMapping
-    public ResultDto<Object> inviteMemberByNickname(@RequestBody InviteMemberRequestDto requestDto) {
+    public ResultDto<Object> inviteMemberByNickname(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody InviteMemberRequestDto requestDto) {
         try {
             User user = userService.findUserById(1L);
             inviteService.inviteMemberByNickname(user, user.getGroup(), requestDto);
@@ -46,7 +48,7 @@ public class InviteApiController {
      * 그룹 초대 수락
      */
     @PostMapping("/accept")
-    public ResultDto<Object> acceptInvitation(@RequestBody AcceptInvitationRequestDto requestDto) {
+    public ResultDto<Object> acceptInvitation(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody AcceptInvitationRequestDto requestDto) {
         try {
             User user = userService.findUserById(4L);
             inviteService.acceptInvitation(user, requestDto);
