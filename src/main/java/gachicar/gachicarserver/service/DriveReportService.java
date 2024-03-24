@@ -1,6 +1,5 @@
 package gachicar.gachicarserver.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.DriveReport;
 import gachicar.gachicarserver.domain.ReportStatus;
@@ -10,13 +9,13 @@ import gachicar.gachicarserver.dto.UsageCountsDto;
 import gachicar.gachicarserver.dto.UserDto;
 import gachicar.gachicarserver.repository.DriveReportRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +26,7 @@ import java.util.stream.Collectors;
 public class DriveReportService {
 
     public final CarService carService;
+    private final NotificationService notificationService;
     public final DriveReportRepository reportRepository;
 
     @Transactional
@@ -110,34 +110,80 @@ public class DriveReportService {
      * 예약 리포트 생성
      */
     @Transactional
-    public ReportDto createReserveReport(User user, String destination, String timeStr) throws JsonProcessingException {
-        int hour = 0;
-
-        // 정규 표현식을 사용하여 숫자 부분을 추출
-        Pattern pattern = Pattern.compile("\\d+");
-        Matcher matcher = pattern.matcher(timeStr);
-
-        if (matcher.find()) {
-            // 숫자 부분을 정수로 변환
-            hour = Integer.parseInt(matcher.group());
-        }
+    public void createReserveReportWithDest(User user, String destination) {
 
         Car userCar = carService.findByUser(user);
-        LocalDate date = LocalDate.now();
-        LocalTime time = LocalTime.of(hour, 0);
-        LocalDateTime endTime = LocalDateTime.of(date, time);
 
-        // 중복 확인
-        boolean isReservationExist = reportRepository.existsByEndTimeAndUserCar(endTime, userCar);
-        if (isReservationExist) {
-            // 이미 같은 시간에 예약이 있음
+        DriveReport driveReport = new DriveReport(userCar, user, destination);
+        reportRepository.save(driveReport);
+    }
+
+    /**
+     * 예약 날짜 및 시간 설정
+     */
+    @Transactional
+    public ReportDto setReserveDateAndTime(Long userId, String date, String hour, String minute) {
+
+        // 날짜와 시간을 LocalDateTime으로 변환
+        LocalDateTime dateTime = parseDateTime(date, hour, minute);
+
+        DriveReport recentReport = getRecentReport(userId, ReportStatus.RESERVE);
+
+        // 시작시간보다 늦게 끝나는 예약이 있는지 확인
+        boolean exists = reportRepository.existsByStartTimeAndUserCar(dateTime, recentReport.getCar());
+        if (!exists) {
+            recentReport.setStartTime(dateTime);
+            return new ReportDto(recentReport);
+        } else {
             return null;
         }
+    }
 
-        DriveReport driveReport = new DriveReport(userCar, user, endTime, destination);
-        reportRepository.save(driveReport);
+    @Transactional
+    public ReportDto setReserveDriveTime(User user, String hour) {
 
-        return new ReportDto(driveReport);
+        // hour 문자열에서 숫자를 추출하여 시간 값으로 파싱
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(hour);
+
+        int hourValue = 0;
+        if (matcher.find()) {
+            hourValue = Integer.parseInt(matcher.group());
+        }
+
+        // 시간 값을 분으로 변환하여 driveTime에 할당
+        Long driveTime = hourValue * 60L;
+
+        DriveReport recentReport = getRecentReport(user.getId(), ReportStatus.RESERVE);
+
+        LocalDateTime startTime = recentReport.getStartTime();
+
+        // driveTime(분)을 더하여 endTime 설정
+        LocalDateTime endTime = startTime.plusMinutes(driveTime);
+
+        // 종료시간보다 일찍 시작하는 예약이 있는지 확인
+        boolean exists = reportRepository.existsByEndTimeAndUserCar(endTime, recentReport.getCar());
+        if (!exists) {
+            recentReport.setEndTime(endTime);
+            recentReport.setDriveTime(driveTime);
+
+            return new ReportDto(recentReport);
+        } else {
+            return null;
+        }
+    }
+
+    private LocalDateTime parseDateTime(String date, String hour, String minute) {
+        // 날짜를 LocalDateTime으로 파싱
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        LocalDateTime parsedDate = LocalDateTime.parse(date, dateFormatter);
+
+        // 시간을 LocalDateTime으로 파싱
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh시mm분");
+        LocalDateTime parsedTime = LocalDateTime.parse(hour + minute, timeFormatter);
+
+        // 날짜와 시간을 결합하여 하나의 LocalDateTime으로 반환
+        return parsedDate.withHour(parsedTime.getHour()).withMinute(parsedTime.getMinute());
     }
 
 
@@ -154,6 +200,21 @@ public class DriveReportService {
 
         recentReport.setDriveTime(recentReport.getDriveTime()+diffMin);
         recentReport.setType(ReportStatus.COMPLETE);
+    }
+
+    /**
+     * 예약된 시간에 사용자에게 알림 보내기
+     */
+    @Scheduled(fixedRate = 60000) // 매 분마다 실행
+    public void remindReservationTime() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime end = now.plusMinutes(1); // 1분 후까지의 예약을 조회
+        List<DriveReport> reportList = reportRepository.findByReservationTimeBetween(now, end);
+
+        for (DriveReport driveReport : reportList) {
+            notificationService.sendReserveReminder(driveReport.getUser().getName(), new ReportDto(driveReport));
+
+        }
     }
 
 

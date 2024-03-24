@@ -113,11 +113,22 @@ public class DriveReportRepository {
     }
 
 
-    // 같은 시간에 예약한 사용자가 있는지 확인
+    // 시작시간보다 늦게 끝나는 예약이 있는지 확인
+    public boolean existsByStartTimeAndUserCar(LocalDateTime startTime, Car car) {
+        List<Long> result = em.createQuery("SELECT COUNT(r) FROM DriveReport r " +
+                        "WHERE r.endTime > :startTime AND r.car = :car AND r.type = :type", Long.class)
+                .setParameter("startTime", startTime)
+                .setParameter("car", car)
+                .setParameter("type", ReportStatus.RESERVE)
+                .getResultList();
+        return !result.isEmpty() && result.get(0) > 0;
+    }
+
+    // 종료시간보다 일찍 시작하는 예약이 있는지 확인
     public boolean existsByEndTimeAndUserCar(LocalDateTime endTime, Car car) {
         List<Long> result = em.createQuery("SELECT COUNT(r) FROM DriveReport r " +
-                        "WHERE r.endTime = :endTime AND r.car = :car AND r.type = :type", Long.class)
-                .setParameter("endTime", endTime)
+                        "WHERE r.endTime < :startTime AND r.car = :car AND r.type = :type", Long.class)
+                .setParameter("startTime", endTime)
                 .setParameter("car", car)
                 .setParameter("type", ReportStatus.RESERVE)
                 .getResultList();
@@ -134,6 +145,15 @@ public class DriveReportRepository {
                 .setParameter("type", ReportStatus.COMPLETE)
                 .setMaxResults(1) // 최대 결과를 1개로 제한하여 가장 많은 목적지 1개만 반환합니다.
                 .getSingleResult();
+    }
+
+    // 특정 시간 사이의 예약 내역 조회
+    public List<DriveReport> findByReservationTimeBetween(LocalDateTime now, LocalDateTime end) {
+        return em.createQuery(
+                "SELECT d FROM DriveReport d WHERE d.startTime BETWEEN :startTime AND :endTime", DriveReport.class)
+                .setParameter("startTime", now)
+                .setParameter("endTime", end)
+                .getResultList();
     }
 
 }

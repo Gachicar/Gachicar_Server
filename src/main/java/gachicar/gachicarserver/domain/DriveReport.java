@@ -26,6 +26,7 @@ public class DriveReport {
     @Setter
     private Long driveTime;    // 주행시간
 
+    @Setter
     private LocalDateTime startTime;   // 시작시간
 
     @Setter
@@ -62,10 +63,9 @@ public class DriveReport {
     }
 
     // 예약 리포트
-    public DriveReport(Car car, User user, LocalDateTime endTime, String destination) {
+    public DriveReport(Car car, User user, String destination) {
         this.car = car;
         this.user = user;
-        this.endTime = endTime;
         this.destination = destination;
         this.type = ReportStatus.RESERVE;
     }

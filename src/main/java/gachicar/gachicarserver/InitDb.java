@@ -123,12 +123,14 @@ public class InitDb {
             newCar.setDriveTime(210L);
 
             // 예약 리포트
-            LocalDateTime dateTimeReserve = LocalDateTime.of(2024, 4, 2, 10, 0);
-            DriveReport reserveReport = new DriveReport(newCar, user, dateTimeReserve, "회사");
+            LocalDateTime dateTimeReserve = LocalDateTime.of(2024, 3, 24, 21, 4);
+            DriveReport reserveReport = new DriveReport(newCar, user, "회사");
+            reserveReport.setStartTime(dateTimeReserve);
             driveReportRepository.save(reserveReport);
 
             LocalDateTime dateTimeReserve2 = LocalDateTime.of(2024, 4, 1, 13, 0);
-            DriveReport reserveReport2 = new DriveReport(newCar, user2, dateTimeReserve2, "학교");
+            DriveReport reserveReport2 = new DriveReport(newCar, user2, "학교");
+            reserveReport2.setStartTime(dateTimeReserve2);
             driveReportRepository.save(reserveReport2);
         }
     }

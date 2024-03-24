@@ -140,29 +140,64 @@ public class ServerThread implements Runnable {
             // JSON 문자열을 객체로 변환
             ReserveRequestDto reserveRequestDto = objectMapper.readValue(response, ReserveRequestDto.class);
             String intention = reserveRequestDto.getIntention();
+            String date = reserveRequestDto.getDate();
+            String hour = reserveRequestDto.getHour();
+            String minute = reserveRequestDto.getMinute();
 
-            if (intention.equals("주문")) {
-                String destination = reserveRequestDto.getDestination();
-                if (destination.equals("")) {
-                    sendToAndroidClient("다시 말씀해주시겠어요?");
-                } else {
-                    // 안드로이드 클라이언트에 응답
-                    sendToAndroidClient(reserveRequestDto.getResponse());
+            switch (intention) {
+                case "주문": {
+                    String destination = reserveRequestDto.getDestination();
+                    if (destination.equals("")) {
+                        sendToAndroidClient("다시 말씀해주시겠어요?");
+                    } else {
+                        // 안드로이드 클라이언트에 응답
+                        sendToAndroidClient(reserveRequestDto.getResponse());
 
-                    // 메시지를 RC 카로 전달
-                    carSocketThread.sendToCar(destination);
-                    driveReportService.createReport(user, destination);  // 리포트 생성
+                        // 메시지를 RC 카로 전달
+                        carSocketThread.sendToCar(destination);
+                        driveReportService.createReport(user, destination);  // 리포트 생성
+                    }
+                    break;
                 }
-            } else if (intention.equals("예약")) {
-                ReportDto reserveReport = driveReportService.createReserveReport(user, reserveRequestDto.getDestination(), reserveRequestDto.getTime());
+                case "예약": {
+                    String destination = reserveRequestDto.getDestination();
 
-                if (reserveReport == null) {
-                    sendToAndroidClient("이미 같은 시간에 예약이 있습니다. 다른 시간을 말씀해주세요.");
-                } else {
-                    sendToAndroidClient(reserveRequestDto.getResponse());
+                    // 목적지를 받은 경우
+                    if (!destination.isEmpty()) {
+                        driveReportService.createReserveReportWithDest(user, destination);
+                        sendToAndroidClient("예약하실 날짜와 시간을 말씀해주세요.");
+                    }
+
+                    // 날짜와 시간을 입력받은 경우
+                    else if (date != null && !date.isEmpty() &&
+                            hour != null && !hour.isEmpty() &&
+                            minute != null && !minute.isEmpty()) {
+
+                        ReportDto reportDto = driveReportService.setReserveDateAndTime(userId, date, hour, minute);
+
+                        if (reportDto != null) {
+                            sendToAndroidClient("네 알겠습니다. 몇시간 예약하시겠습니까?");
+                        } else {
+                            sendToAndroidClient("해당 시간은 이미 예약되어있습니다. 다른 시간을 말씀해주세요.");
+                        }
+                    }
+
+                    // 몇 시간 예약할 건지 입력받은 경우
+                    else if (hour != null && !hour.isEmpty() && date == null && minute == null) {
+                        ReportDto reportDto = driveReportService.setReserveDriveTime(user, hour);
+                        if (reportDto != null) {
+                            sendToAndroidClient("예약이 정상적으로 완료되었습니다.");
+                        } else {
+                            sendToAndroidClient("예약 종료 시간보다 일찍 시작되는 예약이 있습니다. 더 짧은 시간을 말씀해주세요.");
+                        }
+                    } else {
+                        sendToAndroidClient("죄송합니다. 다시 한번 말씀해주세요.");
+                    }
+                    break;
                 }
-            } else {
-                sendToAndroidClient(reserveRequestDto.getResponse());
+                default:
+                    sendToAndroidClient(reserveRequestDto.getResponse());
+                    break;
             }
         }
     }

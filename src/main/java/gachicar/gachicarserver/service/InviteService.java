@@ -17,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InviteService {
 
+    private final UserService userService;
     private final GroupService groupService;
     private final NotificationService notificationService;
 
@@ -26,12 +27,14 @@ public class InviteService {
     public void inviteMemberByNickname(User manager, Group group, InviteMemberRequestDto inviteMemberRequestDto) {
         String memberNickname = inviteMemberRequestDto.getNickname();
 
+        User user = userService.findByUserName(memberNickname);
+
         InviteResponse inviteResponse = InviteResponse.builder()
                 .sender(manager.getName())
                 .groupId(group.getGroupId())
                 .build();
 
-        notificationService.sendInvitation(memberNickname, inviteResponse);
+        notificationService.sendInvitation(user.getName(), inviteResponse);
     }
 
     /**

@@ -37,6 +37,15 @@ public class UserService {
         }
     }
 
+    public User findByUserName(String nickname) {
+        try {
+            List<User> userList = userRepository.findByName(nickname);
+            return userList.get(1);
+        } catch (Exception e) {
+            throw new AuthErrorException(AuthErrorStatus.GET_USER_FAILED);
+        }
+    }
+
     @Transactional
     /* 회원 닉네임 변경 */
     public void update(Long userId, UpdateUserNicknameRequestDto updateUserNicknameRequestDto) {
