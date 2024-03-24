@@ -75,4 +75,9 @@ public class NotificationService {
         send(receiver, data, NotificationType.REMINDER);
     }
 
+    // [예약] 차량 출발 알림 보내기
+    public <T> void sendRCStart(String receiver, T data) {
+        send(receiver, data, NotificationType.START_RC);
+    }
+
 }

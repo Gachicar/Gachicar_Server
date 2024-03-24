@@ -8,6 +8,7 @@ import gachicar.gachicarserver.dto.ReportDto;
 import gachicar.gachicarserver.dto.UsageCountsDto;
 import gachicar.gachicarserver.dto.UserDto;
 import gachicar.gachicarserver.repository.DriveReportRepository;
+import gachicar.gachicarserver.socket.CarSocketThread;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 public class DriveReportService {
 
     public final CarService carService;
+    private final CarSocketThread carSocketThread;
     private final NotificationService notificationService;
     public final DriveReportRepository reportRepository;
 
@@ -205,17 +207,35 @@ public class DriveReportService {
     /**
      * 예약된 시간에 사용자에게 알림 보내기
      */
+    @Transactional
+    @Scheduled(fixedRate = 60000) // 매 분마다 실행
+    public void startRCtoReservation() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime end = now.plusMinutes(30); // 30분 후까지의 예약을 조회
+        List<DriveReport> reportList = reportRepository.findByReservationTimeBetween(now, end);
+
+        for (DriveReport driveReport : reportList) {
+            notificationService.sendRCStart(driveReport.getUser().getName(), new ReportDto(driveReport));
+
+            // 차량 상태를 사용 중 상태로 변경
+            Car car = driveReport.getCar();
+            car.setCarStatus(Boolean.TRUE);
+            car.setNowUser(driveReport.getUser().getId());
+            carSocketThread.sendToCar(driveReport.getDestination());
+            driveReport.setType(ReportStatus.RUNNING);
+        }
+    }
+
+    @Transactional
     @Scheduled(fixedRate = 60000) // 매 분마다 실행
     public void remindReservationTime() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime end = now.plusMinutes(1); // 1분 후까지의 예약을 조회
+        LocalDateTime end = now.plusMinutes(1); // 30분 후까지의 예약을 조회
         List<DriveReport> reportList = reportRepository.findByReservationTimeBetween(now, end);
 
         for (DriveReport driveReport : reportList) {
             notificationService.sendReserveReminder(driveReport.getUser().getName(), new ReportDto(driveReport));
-
         }
     }
-
 
 }
