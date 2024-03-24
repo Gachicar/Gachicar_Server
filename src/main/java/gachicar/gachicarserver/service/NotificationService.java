@@ -1,6 +1,7 @@
 package gachicar.gachicarserver.service;
 
 import gachicar.gachicarserver.domain.NotificationType;
+import gachicar.gachicarserver.dto.InviteResponse;
 import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.ApiErrorStatus;
 import gachicar.gachicarserver.repository.EmitterRepository;
@@ -57,6 +58,21 @@ public class NotificationService {
                 throw new ApiErrorException(ApiErrorStatus.NOTIFICATION_CONNECTION_ERROR);
             }
         }, () -> log.info("No emitter found"));
+    }
+
+    // 초대 알림 보내기
+    public <T> void sendInvitation(String receiver, InviteResponse inviteResponse) {
+        send(receiver, inviteResponse, NotificationType.INVITE_MEMBER);
+    }
+
+    // 초대 수락 알림 보내기
+    public <T> void sendAcceptInvitation(String receiver, InviteResponse inviteResponse) {
+        send(receiver, inviteResponse, NotificationType.ACCEPT_INVITATION);
+    }
+
+    // 예약 시간 알림 보내기
+    public <T> void sendReserveReminder(String receiver, T data) {
+        send(receiver, data, NotificationType.REMINDER);
     }
 
 }

@@ -1,10 +1,9 @@
 package gachicar.gachicarserver.service;
 
 import gachicar.gachicarserver.domain.Group;
-import gachicar.gachicarserver.domain.NotificationType;
 import gachicar.gachicarserver.domain.User;
-import gachicar.gachicarserver.dto.requestDto.AcceptInvitationRequestDto;
 import gachicar.gachicarserver.dto.InviteResponse;
+import gachicar.gachicarserver.dto.requestDto.AcceptInvitationRequestDto;
 import gachicar.gachicarserver.dto.requestDto.InviteMemberRequestDto;
 import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.ApiErrorStatus;
@@ -32,12 +31,7 @@ public class InviteService {
                 .groupId(group.getGroupId())
                 .build();
 
-        sendInvitation(memberNickname, inviteResponse);
-    }
-
-    // 초대 알림 보내기
-    private <T> void sendInvitation(String receiver, InviteResponse inviteResponse) {
-        notificationService.send(receiver, inviteResponse, NotificationType.INVITE_MEMBER);
+        notificationService.sendInvitation(memberNickname, inviteResponse);
     }
 
     /**
@@ -65,12 +59,7 @@ public class InviteService {
                 .build();
 
         // 초대 수락 알림 보내기
-        sendAcceptInvitation(group.getManager().getName(), inviteResponse);
-    }
-
-    // 초대 수락 알림 보내기
-    private <T> void sendAcceptInvitation(String receiver, InviteResponse inviteResponse) {
-        notificationService.send(receiver, inviteResponse, NotificationType.ACCEPT_INVITATION);
+        notificationService.sendAcceptInvitation(group.getManager().getName(), inviteResponse);
     }
 
 }
