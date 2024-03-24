@@ -150,7 +150,9 @@ public class DriveReportRepository {
     // 특정 시간 사이의 예약 내역 조회
     public List<DriveReport> findByReservationTimeBetween(LocalDateTime now, LocalDateTime end) {
         return em.createQuery(
-                "SELECT d FROM DriveReport d WHERE d.startTime BETWEEN :startTime AND :endTime", DriveReport.class)
+                "SELECT d FROM DriveReport d WHERE d.type = :type AND " +
+                        "d.startTime BETWEEN :startTime AND :endTime", DriveReport.class)
+                .setParameter("type", ReportStatus.RESERVE)
                 .setParameter("startTime", now)
                 .setParameter("endTime", end)
                 .getResultList();

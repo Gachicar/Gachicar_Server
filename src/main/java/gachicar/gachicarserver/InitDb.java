@@ -123,7 +123,7 @@ public class InitDb {
             newCar.setDriveTime(210L);
 
             // 예약 리포트
-            LocalDateTime dateTimeReserve = LocalDateTime.of(2024, 3, 24, 21, 4);
+            LocalDateTime dateTimeReserve = LocalDateTime.of(2024, 3, 24, 23, 46);
             DriveReport reserveReport = new DriveReport(newCar, user, "회사");
             reserveReport.setStartTime(dateTimeReserve);
             driveReportRepository.save(reserveReport);

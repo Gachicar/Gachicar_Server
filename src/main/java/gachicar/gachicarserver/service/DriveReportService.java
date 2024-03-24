@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 public class DriveReportService {
 
     public final CarService carService;
-    private final CarSocketThread carSocketThread;
     private final NotificationService notificationService;
     public final DriveReportRepository reportRepository;
 
@@ -211,8 +210,8 @@ public class DriveReportService {
     @Scheduled(fixedRate = 60000) // 매 분마다 실행
     public void startRCtoReservation() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime end = now.plusMinutes(30); // 30분 후까지의 예약을 조회
-        List<DriveReport> reportList = reportRepository.findByReservationTimeBetween(now, end);
+        // 예약된 시간 10분 전부터 현재 시간까지의 예약을 조회
+        List<DriveReport> reportList = reportRepository.findByReservationTimeBetween(now.minusMinutes(30), now);
 
         for (DriveReport driveReport : reportList) {
             notificationService.sendRCStart(driveReport.getUser().getName(), new ReportDto(driveReport));
@@ -220,7 +219,10 @@ public class DriveReportService {
             // 차량 상태를 사용 중 상태로 변경
             Car car = driveReport.getCar();
             car.setCarStatus(Boolean.TRUE);
-            car.setNowUser(driveReport.getUser().getId());
+            Long userId = driveReport.getUser().getId();
+            car.setNowUser(userId);
+
+            CarSocketThread carSocketThread = new CarSocketThread(userId, this);
             carSocketThread.sendToCar(driveReport.getDestination());
             driveReport.setType(ReportStatus.RUNNING);
         }
@@ -230,7 +232,7 @@ public class DriveReportService {
     @Scheduled(fixedRate = 60000) // 매 분마다 실행
     public void remindReservationTime() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime end = now.plusMinutes(1); // 30분 후까지의 예약을 조회
+        LocalDateTime end = now.plusMinutes(1);
         List<DriveReport> reportList = reportRepository.findByReservationTimeBetween(now, end);
 
         for (DriveReport driveReport : reportList) {
