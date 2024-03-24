@@ -130,8 +130,8 @@ public class DriveReportService {
 
         DriveReport recentReport = getRecentReport(userId, ReportStatus.RESERVE);
 
-        // 시작시간보다 늦게 끝나는 예약이 있는지 확인
-        boolean exists = reportRepository.existsByStartTimeAndUserCar(dateTime, recentReport.getCar());
+        // 시작시간보다 늦게 끝나는 예약이 있는지 확인: 30분 여유 설정
+        boolean exists = reportRepository.existsByStartTimeAndUserCar(dateTime.plusMinutes(30), recentReport.getCar());
         if (!exists) {
             recentReport.setStartTime(dateTime);
             return new ReportDto(recentReport);
@@ -162,8 +162,8 @@ public class DriveReportService {
         // driveTime(분)을 더하여 endTime 설정
         LocalDateTime endTime = startTime.plusMinutes(driveTime);
 
-        // 종료시간보다 일찍 시작하는 예약이 있는지 확인
-        boolean exists = reportRepository.existsByEndTimeAndUserCar(endTime, recentReport.getCar());
+        // 종료시간보다 일찍 시작하는 예약이 있는지 확인: 30분 여유
+        boolean exists = reportRepository.existsByEndTimeAndUserCar(endTime.plusMinutes(30), recentReport.getCar());
         if (!exists) {
             recentReport.setEndTime(endTime);
             recentReport.setDriveTime(driveTime);
