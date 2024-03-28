@@ -124,16 +124,17 @@ public class InitDb {
             newCar.setDistance(497L);
 
             // 예약 리포트
-            LocalDateTime dateTimeReserve = LocalDateTime.of(2024, 3, 25, 11, 20);
-            LocalDateTime dateTimeReserve11 = LocalDateTime.of(2024, 3, 24, 12, 20);
+            LocalDateTime dateTimeReserve = LocalDateTime.of(2024, 3, 25, 11, 20);      // 시작 시간
+            LocalDateTime dateTimeReserve11 = LocalDateTime.of(2024, 3, 24, 12, 20);    // 종료 시간
 
+            // user: 이연수, user2: 김예지, user3: 임리안
             DriveReport reserveReport = new DriveReport(newCar, user, "회사");
             reserveReport.setStartTime(dateTimeReserve);
             reserveReport.setEndTime(dateTimeReserve11);
             driveReportRepository.save(reserveReport);
 
-            LocalDateTime dateTimeReserve2 = LocalDateTime.of(2024, 4, 1, 13, 0);
-            LocalDateTime dateTimeReserve22 = LocalDateTime.of(2024, 4, 1, 15, 0);
+            LocalDateTime dateTimeReserve2 = LocalDateTime.of(2024, 4, 1, 13, 0);       // 시작 시간
+            LocalDateTime dateTimeReserve22 = LocalDateTime.of(2024, 4, 1, 15, 0);      // 종료 시간
             DriveReport reserveReport2 = new DriveReport(newCar, user2, "학교");
             reserveReport2.setStartTime(dateTimeReserve2);
             reserveReport2.setEndTime(dateTimeReserve22);
