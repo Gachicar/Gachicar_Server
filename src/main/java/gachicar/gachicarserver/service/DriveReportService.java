@@ -6,7 +6,6 @@ import gachicar.gachicarserver.domain.ReportStatus;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.ReportDto;
 import gachicar.gachicarserver.dto.UsageCountsDto;
-import gachicar.gachicarserver.dto.UserDto;
 import gachicar.gachicarserver.repository.DriveReportRepository;
 import gachicar.gachicarserver.socket.CarSocketThread;
 import lombok.RequiredArgsConstructor;
@@ -75,9 +74,8 @@ public class DriveReportService {
     /**
      * 그룹 내 최다 사용자 조회
      */
-    public UserDto getMostUserInGroupReport(Long carId) {
-        User user = reportRepository.findUserWithMostUsageForCar(carId);
-        return new UserDto(user);
+    public UsageCountsDto getMostUserInGroupReport(Long carId) {
+        return reportRepository.findUserWithMostUsageForCar(carId);
     }
 
     /**

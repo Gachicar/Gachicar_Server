@@ -46,15 +46,21 @@ public class DriveReportRepository {
     }
 
     // 그룹 내 최다 사용자 조회
-    public User findUserWithMostUsageForCar(Long carId) {
+    public UsageCountsDto findUserWithMostUsageForCar(Long carId) {
         try {
-            return em.createQuery("SELECT dr.user FROM DriveReport dr " +
+            Object[] result = em.createQuery("SELECT dr.user, COUNT(dr)  FROM DriveReport dr " +
                     "WHERE dr.car.id = :carId AND dr.type = :type " +
-                    "GROUP BY dr.user ORDER BY COUNT(dr.user) DESC", User.class)
+                    "GROUP BY dr.user ORDER BY COUNT(dr.user) DESC", Object[].class)
                     .setParameter("carId", carId)
                     .setParameter("type", ReportStatus.COMPLETE)
                     .setMaxResults(1)
                     .getSingleResult();
+
+            UserDto userDto = new UserDto((User) result[0]);
+            Long count = (Long) result[1];
+
+            return new UsageCountsDto(userDto, count);
+
         } catch (NoResultException e) {
             return null;
         }

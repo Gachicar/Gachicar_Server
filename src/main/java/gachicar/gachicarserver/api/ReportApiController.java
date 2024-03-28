@@ -72,7 +72,7 @@ public class ReportApiController {
         try {
             User user = userService.findUserById(userDetail.getId());
             Car car = user.getGroup().getCar();
-            UserDto mostUserInGroupReport = driveReportService.getMostUserInGroupReport(car.getId());
+            UsageCountsDto mostUserInGroupReport = driveReportService.getMostUserInGroupReport(car.getId());
 
             return ResultDto.of(HttpStatusCode.OK, "그룹 내 최다 사용자 조회 성공", mostUserInGroupReport);
         } catch (AuthErrorException e) {

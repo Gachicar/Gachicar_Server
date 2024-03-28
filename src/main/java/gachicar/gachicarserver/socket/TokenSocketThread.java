@@ -24,6 +24,7 @@ public class TokenSocketThread implements Runnable {
     }
 
     /**
+     *
      * TokenServer에 연결
      */
     private void connectToTokenServer() {
