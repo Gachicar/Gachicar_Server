@@ -39,7 +39,7 @@ public class InitDb {
             // 사용자 생성
             User user = User.builder()
                     .name("이연수")
-                    .email("bestdustn@naver.com")
+                    .email("bestdustn@gmail.com")
                     .build();
             user.setRole(Role.MANAGER);
             userRepository.save(user);
@@ -121,6 +121,7 @@ public class InitDb {
 
             newCar.setLatestDate(LocalDateTime.of(2024, 3, 28, 16, 25));
             newCar.setDriveTime(210L);
+            newCar.setDistance(497L);
 
             // 예약 리포트
             LocalDateTime dateTimeReserve = LocalDateTime.of(2024, 3, 25, 11, 20);

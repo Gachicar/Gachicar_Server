@@ -33,7 +33,7 @@ public class Car {
     private Long nowUser;   // 현재 사용자
 
     @Setter
-    private Long distance;  // 주행거리
+    private Long distance = 0L;  // 주행거리
 
     @Setter
     private int oilStatus = 100;  // 주유 상태: 0~100
