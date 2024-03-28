@@ -38,7 +38,12 @@ public class GroupService {
     }
 
     public GroupDto getUserGroup(User user) {
-        return new GroupDto(user.getGroup());
+        GroupEntity group = user.getGroup();
+        if (group != null) {
+            return new GroupDto(user.getGroup());
+        } else {
+            throw new ApiErrorException(ApiErrorStatus.NOT_HAVE_GROUP);
+        }
     }
 
     /* 그룹 닉네임 수정 */
