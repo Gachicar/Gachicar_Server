@@ -37,6 +37,11 @@ public enum ApiErrorStatus {
     PORT_ERROR(HttpStatusCode.INTERNAL_SERVER_ERROR, "포트 접속 실패"),
 
     /**
+     * Report 관련 에러 코드
+     */
+    NO_RESULT(HttpStatusCode.NO_CONTENT, "내용 없음"),
+
+    /**
      * 알림 관련 에러 코드
      */
     NOTIFICATION_CONNECTION_ERROR(HttpStatusCode.INTERNAL_SERVER_ERROR, "알림 서비스 연결 실패");

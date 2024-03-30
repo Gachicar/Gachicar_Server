@@ -6,6 +6,8 @@ import gachicar.gachicarserver.domain.ReportStatus;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.UsageCountsDto;
 import gachicar.gachicarserver.dto.UserDto;
+import gachicar.gachicarserver.exception.ApiErrorException;
+import gachicar.gachicarserver.exception.ApiErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -41,7 +43,7 @@ public class DriveReportRepository {
                     .getSingleResult();
 
         } catch (NoResultException e) {
-            return null;
+            throw new ApiErrorException(ApiErrorStatus.NO_RESULT);
         }
     }
 
@@ -62,7 +64,7 @@ public class DriveReportRepository {
             return new UsageCountsDto(userDto, count);
 
         } catch (NoResultException e) {
-            return null;
+            throw new ApiErrorException(ApiErrorStatus.NO_RESULT);
         }
     }
 
@@ -86,7 +88,7 @@ public class DriveReportRepository {
 
             return countsDtoList;
         } catch (NoResultException e) {
-            return null;
+            throw new ApiErrorException(ApiErrorStatus.NO_RESULT);
         }
     }
 
@@ -100,7 +102,7 @@ public class DriveReportRepository {
                     .setParameter("type", type)
                     .getResultList();
         } catch (NoResultException e) {
-            return null;
+            throw new ApiErrorException(ApiErrorStatus.NO_RESULT);
         }
     }
 
@@ -114,7 +116,7 @@ public class DriveReportRepository {
                     .setParameter("type", type)
                     .getResultList();
         } catch (NoResultException e) {
-            return null;
+            throw new ApiErrorException(ApiErrorStatus.NO_RESULT);
         }
     }
 
@@ -142,15 +144,19 @@ public class DriveReportRepository {
     }
 
     public String getFavoriteDestination(Long carId) {
-        return (String) em.createQuery("SELECT d.destination " +
-                        "FROM DriveReport d " +
-                        "WHERE d.car.id = :carId AND d.type = :type " +
-                        "GROUP BY d.destination " +
-                        "ORDER BY COUNT(d.destination) DESC")
-                .setParameter("carId", carId)
-                .setParameter("type", ReportStatus.COMPLETE)
-                .setMaxResults(1) // 최대 결과를 1개로 제한하여 가장 많은 목적지 1개만 반환합니다.
-                .getSingleResult();
+        try {
+            return (String) em.createQuery("SELECT d.destination " +
+                            "FROM DriveReport d " +
+                            "WHERE d.car.id = :carId AND d.type = :type " +
+                            "GROUP BY d.destination " +
+                            "ORDER BY COUNT(d.destination) DESC")
+                    .setParameter("carId", carId)
+                    .setParameter("type", ReportStatus.COMPLETE)
+                    .setMaxResults(1) // 최대 결과를 1개로 제한하여 가장 많은 목적지 1개만 반환합니다.
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            throw new ApiErrorException(ApiErrorStatus.NO_RESULT);
+        }
     }
 
     // 특정 시간 사이의 예약 내역 조회
