@@ -1,10 +1,9 @@
 package gachicar.gachicarserver.service;
 
-import gachicar.gachicarserver.domain.Car;
-import gachicar.gachicarserver.domain.DriveReport;
-import gachicar.gachicarserver.domain.GroupEntity;
-import gachicar.gachicarserver.domain.User;
+import gachicar.gachicarserver.domain.*;
 import gachicar.gachicarserver.dto.CarDto;
+import gachicar.gachicarserver.dto.requestDto.UpdateCarNameRequestDto;
+import gachicar.gachicarserver.dto.requestDto.UpdateCarNumberRequestDto;
 import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.ApiErrorStatus;
 import gachicar.gachicarserver.exception.ApiErrorWithItemException;
@@ -77,6 +76,40 @@ public class CarService {
         car.setDistance(car.getDistance() + car.getDriveTime()*50);
 
         car.setLocation(favoriteDest);
+    }
+
+    /* 공유차량 이름 수정 */
+    public void updateCarName(User user, UpdateCarNameRequestDto requestDto) {
+        Car car = user.getGroup().getCar();
+
+        if (car == null) {
+            throw new ApiErrorWithItemException(ApiErrorStatus.NOT_EXIST, "공유차량이");
+        } else {
+            // 사용자가 그룹장인지 확인
+            if (user.getRole() == Role.MANAGER) {
+                // 차량 이름 수정
+                car.setCarName(requestDto.getCarName());
+            } else {
+                throw new ApiErrorException(ApiErrorStatus.NOT_MANAGER);
+            }
+        }
+    }
+
+    /* 공유차량 번호 수정 */
+    public void updateCarNumber(User user, UpdateCarNumberRequestDto requestDto) {
+        Car car = user.getGroup().getCar();
+
+        if (car == null) {
+            throw new ApiErrorWithItemException(ApiErrorStatus.NOT_EXIST, "공유차량이");
+        } else {
+            // 사용자가 그룹장인지 확인
+            if (user.getRole() == Role.MANAGER) {
+                // 차량 번호 수정
+                car.setCarNumber(requestDto.getCarNumber());
+            } else {
+                throw new ApiErrorException(ApiErrorStatus.NOT_MANAGER);
+            }
+        }
     }
 
 }

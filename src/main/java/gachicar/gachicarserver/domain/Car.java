@@ -17,7 +17,10 @@ public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Setter
     private String carName;
+    @Setter
     private String carNumber;
 
     @Setter
