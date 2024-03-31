@@ -153,6 +153,7 @@ public class DriveReportService {
         // 시간 값을 분으로 변환하여 driveTime에 할당
         Long driveTime = hourValue * 60L;
 
+        // TODO: recent Report 가져오면 지금 예약 중인 게 아니라 더 나중에 예약한 리포트가 가져와짐. 수정 필요
         DriveReport recentReport = getRecentReport(user.getId(), ReportStatus.RESERVE);
 
         LocalDateTime startTime = recentReport.getStartTime();
@@ -173,16 +174,13 @@ public class DriveReportService {
     }
 
     private LocalDateTime parseDateTime(String date, String hour, String minute) {
-        // 날짜를 LocalDateTime으로 파싱
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        LocalDateTime parsedDate = LocalDateTime.parse(date, dateFormatter);
 
-        // 시간을 LocalDateTime으로 파싱
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh시mm분");
-        LocalDateTime parsedTime = LocalDateTime.parse(hour + minute, timeFormatter);
+        // 날짜와 시간을 하나의 문자열로 합치기
+        String dateTimeString = date + " " + hour + minute;
 
-        // 날짜와 시간을 결합하여 하나의 LocalDateTime으로 반환
-        return parsedDate.withHour(parsedTime.getHour()).withMinute(parsedTime.getMinute());
+        // 하나의 문자열로 합쳐진 날짜와 시간을 LocalDateTime으로 파싱
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH시mm분");
+        return LocalDateTime.parse(dateTimeString, formatter);
     }
 
 

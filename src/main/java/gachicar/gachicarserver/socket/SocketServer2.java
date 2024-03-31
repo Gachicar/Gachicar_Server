@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -17,18 +18,18 @@ import java.util.concurrent.ExecutorService;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SocketServer {
+public class SocketServer2 {
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
     private final Map<Long, Socket> clientSockets = new ConcurrentHashMap<>();
-    private final Map<Long, CarSocketThread> userCarSocketThreads = new ConcurrentHashMap<>();
+//    private final Map<Long, CarSocketThread> userCarSocketThreads = new ConcurrentHashMap<>();
 
     private final UserService userService;
     private final DriveReportService driveReportService;
     private final CarService carService;
 
-//    @PostConstruct
+    @PostConstruct
     public void start() {
         executorService.execute(() -> {
             log.info("Socket server thread is now open: {}", 9595);
@@ -44,10 +45,6 @@ public class SocketServer {
                     long clientId = 1L; // 클라이언트 ID 생성 (원하는 방식으로)
 
                     clientSockets.put(clientId, clientSocket);
-
-                    // 해당 사용자에 대한 CarSocketThread 객체 생성
-                    CarSocketThread carSocketThread = new CarSocketThread(clientId, driveReportService);
-                    userCarSocketThreads.put(clientId, carSocketThread);
 
                     // 목적지 토큰을 반환하는 스레드 실행
                     TokenSocketThread tokenSocketThread = new TokenSocketThread();
@@ -71,8 +68,8 @@ public class SocketServer {
     }
 
     // CarSocketThread 객체에 접근할 수 있는 메서드
-    public CarSocketThread getCarSocketThread(long clientId) {
-        return userCarSocketThreads.get(clientId);
-    }
+//    public CarSocketThread getCarSocketThread(long clientId) {
+//        return userCarSocketThreads.get(clientId);
+//    }
 
 }
