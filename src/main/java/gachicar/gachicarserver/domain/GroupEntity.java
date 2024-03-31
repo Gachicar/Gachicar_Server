@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Table(name="Group_table")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Group {
+public class GroupEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long groupId;
@@ -20,6 +20,7 @@ public class Group {
     @Setter
     private String desc;
 
+    @Setter
     @OneToMany
     private List<User> memberList = new ArrayList<>();
 
@@ -33,7 +34,7 @@ public class Group {
     private Car car;
 
     @Builder
-    public Group(String name, String desc, User manager) {
+    public GroupEntity(String name, String desc, User manager) {
         this.name = name;
         this.desc = desc;
         this.manager = manager;

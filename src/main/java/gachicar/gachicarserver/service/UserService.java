@@ -1,6 +1,6 @@
 package gachicar.gachicarserver.service;
 
-import gachicar.gachicarserver.domain.Group;
+import gachicar.gachicarserver.domain.GroupEntity;
 import gachicar.gachicarserver.domain.Role;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.requestDto.DeleteGroupRequestDto;
@@ -37,11 +37,24 @@ public class UserService {
         }
     }
 
+    public User findByUserName(String nickname) {
+        List<User> userList = userRepository.findByName(nickname);
+        if (userList.isEmpty()) {
+            throw new AuthErrorException(AuthErrorStatus.GET_USER_FAILED);
+        }
+        return userList.get(0); // 리스트가 비어있지 않으면 첫 번째 요소를 반환
+    }
+
     @Transactional
     /* 회원 닉네임 변경 */
     public void update(Long userId, UpdateUserNicknameRequestDto updateUserNicknameRequestDto) {
-        User user = userRepository.findOne(userId);
-        user.setName(updateUserNicknameRequestDto.getUserNickname());
+        String newName = updateUserNicknameRequestDto.getUserNickname();
+        if (userRepository.findByName(newName).isEmpty()) {
+            User user = userRepository.findOne(userId);
+            user.setName(newName);
+        } else {
+            throw new ApiErrorException(ApiErrorStatus.DUPLICATED_USER_NAME);
+        }
     }
 
     @Transactional
@@ -53,15 +66,18 @@ public class UserService {
 
     @Transactional
     /* 그룹 변경 */
-    public void updateGroup(User user, Group group) {
+    public void updateGroup(User user, GroupEntity group) {
         user.setGroup(group);
         user.setRole(Role.MANAGER);
+        List<User> memberList = group.getMemberList();
+        memberList.add(user);
+        group.setMemberList(memberList);
     }
 
     @Transactional
     /* 그룹 삭제 */
     public void deleteGroup(User user, DeleteGroupRequestDto requestDto) {
-        Group group = user.getGroup();
+        GroupEntity group = user.getGroup();
 
         if (group != null) {
             if (requestDto.getDeleteId() != null) {

@@ -5,6 +5,7 @@ import gachicar.gachicarserver.config.jwt.JwtProvider;
 import gachicar.gachicarserver.config.jwt.dto.TokenDto;
 import gachicar.gachicarserver.config.jwt.dto.TokenRefreshDto;
 import gachicar.gachicarserver.dto.ResultDto;
+import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.AuthErrorStatus;
 import gachicar.gachicarserver.exception.HttpStatusCode;
@@ -55,6 +56,8 @@ public class SocialLoginApiController {
             }
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
         }
@@ -70,6 +73,8 @@ public class SocialLoginApiController {
             String accessToken = jwtProvider.reAccessToken(refreshToken);
             return ResultDto.of(HttpStatusCode.OK, "토큰 재발급", TokenRefreshDto.of(accessToken));
         } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);

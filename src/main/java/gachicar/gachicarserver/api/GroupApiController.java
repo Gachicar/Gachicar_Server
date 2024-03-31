@@ -1,7 +1,7 @@
 package gachicar.gachicarserver.api;
 
 import gachicar.gachicarserver.config.jwt.CustomUserDetail;
-import gachicar.gachicarserver.domain.Group;
+import gachicar.gachicarserver.domain.GroupEntity;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.GroupDto;
 import gachicar.gachicarserver.dto.ResultDto;
@@ -39,11 +39,13 @@ public class GroupApiController {
     public ResultDto<Object> createGroup(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody CreateGroupRequestDto requestDto) {
         try {
             User user = userService.findUserById(userDetail.getId());
-            Group group = groupService.createGroup(requestDto, user);
+            GroupEntity group = groupService.createGroup(requestDto, user);
             userService.updateGroup(user, group);
 
             return ResultDto.of(HttpStatusCode.CREATED, "그룹 생성 성공", null);
         } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
@@ -61,6 +63,9 @@ public class GroupApiController {
 
             return ResultDto.of(HttpStatusCode.OK, "그룹 정보 조회 성공", groupDto);
         } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        }
+        catch (ApiErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (Exception e) {
             return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);

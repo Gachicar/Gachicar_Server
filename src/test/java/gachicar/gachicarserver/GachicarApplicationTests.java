@@ -10,4 +10,12 @@ class GachicarApplicationTests {
 	void contextLoads() {
 	}
 
+//	@Resource
+//	FirebaseService firebaseService;
+//
+//	@Test
+//	public void 테스트() throws Exception {
+//		firebaseService.insertUser();
+//		firebaseService.selectUser();
+//	}
 }

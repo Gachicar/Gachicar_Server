@@ -24,7 +24,7 @@ public class User {
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
-    private Group group;
+    private GroupEntity group;
 
     // 사용자 권한
     @Setter
@@ -32,8 +32,7 @@ public class User {
     private Role role;
 
     @Builder
-    public User(Long id, String name, String email) {
-        this.id = id;
+    public User(String name, String email) {
         this.name = name;
         this.email = email;
         this.role = Role.USER;
