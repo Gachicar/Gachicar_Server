@@ -4,7 +4,7 @@ import gachicar.gachicarserver.config.jwt.CustomUserDetail;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.requestDto.AcceptInvitationRequestDto;
 import gachicar.gachicarserver.dto.ResultDto;
-import gachicar.gachicarserver.dto.requestDto.InviteMemberRequestDto;
+import gachicar.gachicarserver.dto.requestDto.InviteOrRemoveMemberRequestDto;
 import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.HttpStatusCode;
@@ -12,10 +12,7 @@ import gachicar.gachicarserver.service.InviteService;
 import gachicar.gachicarserver.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/invite")
@@ -29,7 +26,7 @@ public class InviteApiController {
      * 초대할 멤버의 닉네임으로 초대
      */
     @PostMapping
-    public ResultDto<Object> inviteMemberByNickname(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody InviteMemberRequestDto requestDto) {
+    public ResultDto<Object> inviteMemberByNickname(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody InviteOrRemoveMemberRequestDto requestDto) {
         try {
             User user = userService.findUserById(userDetail.getId());
             inviteService.inviteMemberByNickname(user, user.getGroup(), requestDto);
