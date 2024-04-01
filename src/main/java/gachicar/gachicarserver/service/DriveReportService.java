@@ -138,22 +138,35 @@ public class DriveReportService {
         }
     }
 
+    /**
+     * 예약 시작시간-종료시간 설정
+     */
     @Transactional
-    public ReportDto setReserveDriveTime(User user, String hour) {
-
-        // hour 문자열에서 숫자를 추출하여 시간 값으로 파싱
-        Pattern pattern = Pattern.compile("\\d+");
-        Matcher matcher = pattern.matcher(hour);
-
+    public ReportDto setReserveDriveTime(User user, Object hour, Object minute) {
         int hourValue = 0;
-        if (matcher.find()) {
-            hourValue = Integer.parseInt(matcher.group());
+        int minuteValue = 0;
+
+        Pattern pattern = Pattern.compile("\\d+");
+
+        if (hour != null) {
+            // hour 문자열에서 숫자를 추출하여 시간 값으로 파싱
+            Matcher matcher = pattern.matcher(hour.toString());
+            if (matcher.find()) {
+                hourValue = Integer.parseInt(matcher.group());
+            }
+        }
+
+        if (minute != null) {
+            // minute 문자열에서 숫자를 추출하여 시간 값으로 파싱
+            Matcher matcher2 = pattern.matcher(minute.toString());
+            if (matcher2.find()) {
+                minuteValue = Integer.parseInt(matcher2.group());
+            }
         }
 
         // 시간 값을 분으로 변환하여 driveTime에 할당
-        Long driveTime = hourValue * 60L;
+        long driveTime = hourValue * 60L + minuteValue;
 
-        // TODO: recent Report 가져오면 지금 예약 중인 게 아니라 더 나중에 예약한 리포트가 가져와짐. 수정 필요
         DriveReport recentReport = getRecentReport(user.getId(), ReportStatus.RESERVE);
 
         LocalDateTime startTime = recentReport.getStartTime();
@@ -163,7 +176,7 @@ public class DriveReportService {
 
         // 종료시간보다 일찍 시작하는 예약이 있는지 확인: 30분 여유
         boolean exists = reportRepository.existsByEndTimeAndUserCar(endTime.plusMinutes(30), recentReport.getCar());
-        if (!exists) {
+        if (exists) {
             recentReport.setEndTime(endTime);
             recentReport.setDriveTime(driveTime);
 

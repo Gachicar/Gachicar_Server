@@ -34,7 +34,7 @@ public class DriveReportRepository {
         try {
             String jpql = "SELECT dr FROM DriveReport dr " +
                     "WHERE dr.user.id = :userId AND dr.type = :type " +
-                    "ORDER BY dr.startTime DESC";
+                    "ORDER BY dr.created_at DESC";
 
             return em.createQuery(jpql, DriveReport.class)
                     .setParameter("userId", userId)
@@ -132,11 +132,15 @@ public class DriveReportRepository {
         return !result.isEmpty() && result.get(0) > 0;
     }
 
-    // 종료시간보다 일찍 시작하는 예약이 있는지 확인
+    /** 종료시간보다 일찍 시작하는 예약이 있는지 확인
+     *  - 주어진 종료 시간 이전에 시작하는 예약이 존재하면 메서드는 true를 반환, 그렇지 않은 경우 false 반환
+     *  - 즉, false 일 때 예약 가능
+     *  - A < B: A가 B보다 이른 경우 True
+     */
     public boolean existsByEndTimeAndUserCar(LocalDateTime endTime, Car car) {
         List<Long> result = em.createQuery("SELECT COUNT(r) FROM DriveReport r " +
-                        "WHERE r.endTime < :startTime AND r.car = :car AND r.type = :type", Long.class)
-                .setParameter("startTime", endTime)
+                        "WHERE r.startTime < :endTime AND r.car = :car AND r.type = :type", Long.class)
+                .setParameter("endTime", endTime)
                 .setParameter("car", car)
                 .setParameter("type", ReportStatus.RESERVE)
                 .getResultList();

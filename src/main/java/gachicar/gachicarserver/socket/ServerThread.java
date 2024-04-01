@@ -177,7 +177,7 @@ public class ServerThread implements Runnable {
 
                     // 몇 시간 예약할 건지 입력받은 경우
                     else if (hour != null && !hour.isEmpty() && date == null && minute == null) {
-                        ReportDto reportDto = driveReportService.setReserveDriveTime(user, hour);
+                        ReportDto reportDto = driveReportService.setReserveDriveTime(user, hour, minute);
                         if (reportDto != null) {
                             sendToAndroidClient("예약이 정상적으로 완료되었습니다.");
                         } else {
