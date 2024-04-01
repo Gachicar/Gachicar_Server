@@ -34,7 +34,7 @@ public class CarSocketThread implements Runnable {
     private void connectToCar() {
         try {
             // RC카의 IP 주소
-            String carIpAddress = "192.168.0.7";    // 192.168.0.7
+            String carIpAddress = "localhost";    // 192.168.0.7
             // RC카의 포트 번호
             int carPort = 9851;
             carSocket = new Socket(carIpAddress, carPort);
@@ -45,6 +45,15 @@ public class CarSocketThread implements Runnable {
     }
 
     public void sendToCar(String message) {
+        while (carSocket == null || !carSocket.isConnected() || carSocket.isClosed()) {
+            // 소켓이 연결될 때까지 대기
+            try {
+                Thread.sleep(1000); // 1초 대기
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         if (carWriter != null) {
             carWriter.println(message);
             System.out.println("Sent to RC car: " + message);

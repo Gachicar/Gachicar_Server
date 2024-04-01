@@ -40,6 +40,8 @@ public class DriveReport {
     @Setter
     private ReportStatus type;    // 주행, 완료, 예약
 
+    private LocalDateTime created_at;   // 리포트 생성 시간
+
     // 주행 리포트
     @Builder
     public DriveReport(Car car, User user, LocalDateTime startTime, String departure, String destination) {
@@ -49,6 +51,7 @@ public class DriveReport {
         this.departure = departure;
         this.destination = destination;
         this.type = ReportStatus.RUNNING;
+        this.created_at = LocalDateTime.now();
     }
 
     public DriveReport(Car car, User user, Long driveTime, LocalDateTime startTime, LocalDateTime endTime, String departure, String destination) {
@@ -68,5 +71,6 @@ public class DriveReport {
         this.user = user;
         this.destination = destination;
         this.type = ReportStatus.RESERVE;
+        this.created_at = LocalDateTime.now();
     }
 }

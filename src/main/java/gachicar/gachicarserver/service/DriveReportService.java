@@ -138,20 +138,34 @@ public class DriveReportService {
         }
     }
 
+    /**
+     * 예약 시작시간-종료시간 설정
+     */
     @Transactional
-    public ReportDto setReserveDriveTime(User user, String hour) {
-
-        // hour 문자열에서 숫자를 추출하여 시간 값으로 파싱
-        Pattern pattern = Pattern.compile("\\d+");
-        Matcher matcher = pattern.matcher(hour);
-
+    public ReportDto setReserveDriveTime(User user, Object hour, Object minute) {
         int hourValue = 0;
-        if (matcher.find()) {
-            hourValue = Integer.parseInt(matcher.group());
+        int minuteValue = 0;
+
+        Pattern pattern = Pattern.compile("\\d+");
+
+        if (hour != null) {
+            // hour 문자열에서 숫자를 추출하여 시간 값으로 파싱
+            Matcher matcher = pattern.matcher(hour.toString());
+            if (matcher.find()) {
+                hourValue = Integer.parseInt(matcher.group());
+            }
+        }
+
+        if (minute != null) {
+            // minute 문자열에서 숫자를 추출하여 시간 값으로 파싱
+            Matcher matcher2 = pattern.matcher(minute.toString());
+            if (matcher2.find()) {
+                minuteValue = Integer.parseInt(matcher2.group());
+            }
         }
 
         // 시간 값을 분으로 변환하여 driveTime에 할당
-        Long driveTime = hourValue * 60L;
+        long driveTime = hourValue * 60L + minuteValue;
 
         DriveReport recentReport = getRecentReport(user.getId(), ReportStatus.RESERVE);
 
@@ -162,7 +176,7 @@ public class DriveReportService {
 
         // 종료시간보다 일찍 시작하는 예약이 있는지 확인: 30분 여유
         boolean exists = reportRepository.existsByEndTimeAndUserCar(endTime.plusMinutes(30), recentReport.getCar());
-        if (!exists) {
+        if (exists) {
             recentReport.setEndTime(endTime);
             recentReport.setDriveTime(driveTime);
 
@@ -173,16 +187,13 @@ public class DriveReportService {
     }
 
     private LocalDateTime parseDateTime(String date, String hour, String minute) {
-        // 날짜를 LocalDateTime으로 파싱
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        LocalDateTime parsedDate = LocalDateTime.parse(date, dateFormatter);
 
-        // 시간을 LocalDateTime으로 파싱
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh시mm분");
-        LocalDateTime parsedTime = LocalDateTime.parse(hour + minute, timeFormatter);
+        // 날짜와 시간을 하나의 문자열로 합치기
+        String dateTimeString = date + " " + hour + minute;
 
-        // 날짜와 시간을 결합하여 하나의 LocalDateTime으로 반환
-        return parsedDate.withHour(parsedTime.getHour()).withMinute(parsedTime.getMinute());
+        // 하나의 문자열로 합쳐진 날짜와 시간을 LocalDateTime으로 파싱
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH시mm분");
+        return LocalDateTime.parse(dateTimeString, formatter);
     }
 
 
