@@ -5,10 +5,7 @@ import gachicar.gachicarserver.domain.GroupEntity;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.GroupDto;
 import gachicar.gachicarserver.dto.ResultDto;
-import gachicar.gachicarserver.dto.requestDto.CreateGroupRequestDto;
-import gachicar.gachicarserver.dto.requestDto.DeleteGroupRequestDto;
-import gachicar.gachicarserver.dto.requestDto.UpdateGroupDescRequestDto;
-import gachicar.gachicarserver.dto.requestDto.UpdateGroupNameRequestDto;
+import gachicar.gachicarserver.dto.requestDto.*;
 import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.AuthErrorException;
 import gachicar.gachicarserver.exception.HttpStatusCode;
@@ -101,6 +98,27 @@ public class GroupApiController {
             groupService.updateGroupDesc(user, requestDto);
 
             return ResultDto.of(HttpStatusCode.OK, "그룹 한줄소개 수정 성공", null);
+        } catch (AuthErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (ApiErrorException e) {
+            return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
+        } catch (Exception e) {
+            return ResultDto.of(HttpStatusCode.INTERNAL_SERVER_ERROR, "서버 에러", null);
+        }
+    }
+
+
+    /**
+     * 그룹 멤버 삭제
+     */
+    @PatchMapping("/deleteMember")
+    public ResultDto<Object> deleteMemberInGroup(@AuthenticationPrincipal CustomUserDetail userDetail, @RequestBody InviteOrRemoveMemberRequestDto requestDto) {
+        try {
+            User user = userService.findUserById(userDetail.getId());
+
+            groupService.deleteMemberFromGroup(user, requestDto);
+
+            return ResultDto.of(HttpStatusCode.OK, "그룹에서 멤버 삭제 성공", null);
         } catch (AuthErrorException e) {
             return ResultDto.of(e.getCode(), e.getErrorMsg(), null);
         } catch (ApiErrorException e) {

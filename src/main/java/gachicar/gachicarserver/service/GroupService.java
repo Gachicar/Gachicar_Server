@@ -4,10 +4,7 @@ import gachicar.gachicarserver.domain.Car;
 import gachicar.gachicarserver.domain.GroupEntity;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.GroupDto;
-import gachicar.gachicarserver.dto.requestDto.CreateGroupRequestDto;
-import gachicar.gachicarserver.dto.requestDto.DeleteGroupRequestDto;
-import gachicar.gachicarserver.dto.requestDto.UpdateGroupDescRequestDto;
-import gachicar.gachicarserver.dto.requestDto.UpdateGroupNameRequestDto;
+import gachicar.gachicarserver.dto.requestDto.*;
 import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.ApiErrorStatus;
 import gachicar.gachicarserver.repository.GroupRepository;
@@ -15,13 +12,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class GroupService {
 
-    public final GroupRepository groupRepository;
+    private final GroupRepository groupRepository;
+    private final UserService userService;
 
     public GroupEntity createGroup(CreateGroupRequestDto requestDto, User user) {
         if (groupRepository.findByName(requestDto.getGroupName()) == null) {
@@ -67,6 +67,26 @@ public class GroupService {
         // 사용자가 그룹장인지 확인
         if (group.getManager() == user) {
             group.setName(requestDto.getNewDesc());
+        } else {
+            throw new ApiErrorException(ApiErrorStatus.NOT_MANAGER);
+        }
+    }
+
+
+    /**
+     * 그룹에서 멤버 삭제
+     */
+    @Transactional
+    public void deleteMemberFromGroup(User user, InviteOrRemoveMemberRequestDto requestDto) {
+        GroupEntity group = user.getGroup();
+
+        // 사용자가 그룹장인지 확인
+        if (group.getManager() == user) {
+            String nickname = requestDto.getNickname();
+            User byUserName = userService.findByUserName(nickname);
+            List<User> memberList = group.getMemberList();
+            memberList.remove(byUserName);
+            group.setMemberList(memberList);
         } else {
             throw new ApiErrorException(ApiErrorStatus.NOT_MANAGER);
         }
