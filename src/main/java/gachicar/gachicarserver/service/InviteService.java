@@ -4,7 +4,7 @@ import gachicar.gachicarserver.domain.GroupEntity;
 import gachicar.gachicarserver.domain.User;
 import gachicar.gachicarserver.dto.InviteResponse;
 import gachicar.gachicarserver.dto.requestDto.AcceptInvitationRequestDto;
-import gachicar.gachicarserver.dto.requestDto.InviteMemberRequestDto;
+import gachicar.gachicarserver.dto.requestDto.InviteOrRemoveMemberRequestDto;
 import gachicar.gachicarserver.exception.ApiErrorException;
 import gachicar.gachicarserver.exception.ApiErrorStatus;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +24,8 @@ public class InviteService {
     /**
      * 닉네임으로 멤버 초대 알림 보내기
      */
-    public void inviteMemberByNickname(User manager, GroupEntity group, InviteMemberRequestDto inviteMemberRequestDto) {
-        String memberNickname = inviteMemberRequestDto.getNickname();
+    public void inviteMemberByNickname(User manager, GroupEntity group, InviteOrRemoveMemberRequestDto inviteOrRemoveMemberRequestDto) {
+        String memberNickname = inviteOrRemoveMemberRequestDto.getNickname();
 
         User user = userService.findByUserName(memberNickname);
 

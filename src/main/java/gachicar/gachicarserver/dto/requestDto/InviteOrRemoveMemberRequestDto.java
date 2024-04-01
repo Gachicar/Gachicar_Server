@@ -5,6 +5,6 @@ import lombok.RequiredArgsConstructor;
 
 @Data
 @RequiredArgsConstructor
-public class InviteMemberRequestDto {
+public class InviteOrRemoveMemberRequestDto {
     private String nickname;
 }
