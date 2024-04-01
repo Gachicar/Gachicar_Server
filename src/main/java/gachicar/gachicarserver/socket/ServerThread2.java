@@ -52,9 +52,6 @@ public class ServerThread2 implements Runnable {
 
         this.user = userService.findUserById(userId);
         this.car = carService.findByUser(user);
-
-        // 해당 사용자에 대한 CarSocketThread 객체 생성
-        this.carSocketThread = new CarSocketThread(userId, driveReportService);
         
     }
 
@@ -69,29 +66,13 @@ public class ServerThread2 implements Runnable {
             if (car.getCarStatus() == Boolean.TRUE) {
                 androidClientWriter.println("지금은 공유차량을 사용할 수 없습니다.");
             } else {
-                car.setCarStatus(Boolean.TRUE);
-                car.setNowUser(userId);
-
-                // CarSocketThread를 executorService로 실행
-                executorService.execute(carSocketThread);
 
                 while ((inputLine = ois.readLine()) != null) {
                     System.out.println("Received from Android client: " + inputLine);
 
-                    if (inputLine.contains("종료")) {
-                        sendToAndroidClient("운행을 종료합니다.");
-                        carSocketThread.sendToCar("종료");
-                        break;
-                    } else if (inputLine.contains("정지")) {
-                        sendToAndroidClient("정지합니다.");
-                        carSocketThread.sendToCar("정지");
-                    } else if (inputLine.contains("어디")) {
-                        sendToAndroidClient("저는 지금 " + car.getCurLoc() + "에 있습니다.");
-                    } else if (inputLine.contains("주문")) {
-                        carSocketThread.sendToCar(inputLine);
-                    } else {
-                        sendAndReceiveTokenMessage(inputLine);
-                    }
+                    // 의도 분류 서버로 전송 후 의도에 따라 작업 처리
+                    sendAndReceiveTokenMessage(inputLine);
+
                 }
             }
         } catch (IOException e) {
@@ -116,7 +97,8 @@ public class ServerThread2 implements Runnable {
     }
 
     /**
-     * 사용자 명령에서 목적지 추출하기
+     * 사용자 명령에서 의도 분류
+     * - 의도: 주문, 예약, 인사, 욕설, 기타
      */
     private void sendAndReceiveTokenMessage(String message) throws JsonProcessingException {
         tokenSocketThread.reconnectToTokenServer();
@@ -141,15 +123,23 @@ public class ServerThread2 implements Runnable {
             switch (intention) {
                 case "주문": {
 
-                    // CarSocketThread를 executorService로 실행
-                    executorService.execute(carSocketThread);
+                    // 차량 상태 업데이트
+                    car.setCarStatus(Boolean.TRUE);
+                    car.setNowUser(userId);
 
                     String destination = reserveRequestDto.getDestination();
                     if (destination.equals("")) {
                         sendToAndroidClient("다시 말씀해주시겠어요?");
                     } else {
+
                         // 안드로이드 클라이언트에 응답
                         sendToAndroidClient(reserveRequestDto.getResponse());
+
+                        // 해당 사용자에 대한 CarSocketThread 객체 생성
+                        this.carSocketThread = new CarSocketThread(userId, driveReportService);
+
+                        // CarSocketThread를 executorService로 실행
+                        executorService.execute(carSocketThread);
 
                         // 메시지를 RC 카로 전달
                         carSocketThread.sendToCar(destination);

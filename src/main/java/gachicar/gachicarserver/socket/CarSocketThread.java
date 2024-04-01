@@ -45,6 +45,15 @@ public class CarSocketThread implements Runnable {
     }
 
     public void sendToCar(String message) {
+        while (carSocket == null || !carSocket.isConnected() || carSocket.isClosed()) {
+            // 소켓이 연결될 때까지 대기
+            try {
+                Thread.sleep(1000); // 1초 대기
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         if (carWriter != null) {
             carWriter.println(message);
             System.out.println("Sent to RC car: " + message);
