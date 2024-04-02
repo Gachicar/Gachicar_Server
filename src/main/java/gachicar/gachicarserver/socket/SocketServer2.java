@@ -8,7 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
@@ -39,10 +41,10 @@ public class SocketServer2 {
                     System.out.println("Client connected from " + clientSocket.getInetAddress());
 
                     // 클라이언트로부터 ID를 받음
-//                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//                    String clientId = in.readLine(); // 클라이언트가 보낸 ID를 읽음
-//                    System.out.println("Received ID from client: " + clientId);
-                    long clientId = 1L; // 클라이언트 ID 생성 (원하는 방식으로)
+                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    Long clientId = Long.parseLong(in.readLine()); // 클라이언트가 보낸 ID를 읽음
+                    System.out.println("Received ID from client: " + clientId);
+//                    long clientId = 1L; // 클라이언트 ID 생성 (원하는 방식으로)
 
                     clientSockets.put(clientId, clientSocket);
 

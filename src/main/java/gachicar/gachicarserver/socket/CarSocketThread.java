@@ -21,7 +21,7 @@ public class CarSocketThread implements Runnable {
     private final DriveReportService driveReportService;
 
     @Setter
-    private ServerThread serverThread;
+    private ServerThread2 serverThread;
 
     private Socket carSocket;                     // RC카와의 소켓 연결
     private PrintWriter carWriter;
