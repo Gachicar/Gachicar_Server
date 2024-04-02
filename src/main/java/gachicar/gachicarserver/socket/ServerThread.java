@@ -17,7 +17,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 
-public class ServerThread2 implements Runnable {
+public class ServerThread implements Runnable {
 
     private final ExecutorService executorService;
     private final Socket clientSocket;
@@ -33,9 +33,9 @@ public class ServerThread2 implements Runnable {
     User user;
     Car car;
 
-    public ServerThread2(Socket clientSocket, TokenSocketThread tokenSocketThread,
+    public ServerThread(Socket clientSocket, TokenSocketThread tokenSocketThread,
                         Long userId, UserService userService, DriveReportService driveReportService, CarService carService,
-                         ExecutorService executorService) {
+                        ExecutorService executorService) {
         this.clientSocket = clientSocket;
         this.tokenSocketThread = tokenSocketThread;
         this.userId = userId;

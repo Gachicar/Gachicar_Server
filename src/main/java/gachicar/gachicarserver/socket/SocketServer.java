@@ -20,12 +20,11 @@ import java.util.concurrent.ExecutorService;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SocketServer2 {
+public class SocketServer {
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
     private final Map<Long, Socket> clientSockets = new ConcurrentHashMap<>();
-//    private final Map<Long, CarSocketThread> userCarSocketThreads = new ConcurrentHashMap<>();
 
     private final UserService userService;
     private final DriveReportService driveReportService;
@@ -53,14 +52,9 @@ public class SocketServer2 {
                     executorService.execute(tokenSocketThread);
 
                     // 안드로이드 클라이언트와의 소켓 연결을 처리하는 스레드 실행
-//                    ServerThread serverThread = new ServerThread(clientSocket, carSocketThread, tokenSocketThread,
-//                                                                    clientId, userService, driveReportService, carService);
-                    ServerThread2 serverThread = new ServerThread2(clientSocket, tokenSocketThread,
+                    ServerThread serverThread = new ServerThread(clientSocket, tokenSocketThread,
                             clientId, userService, driveReportService, carService, executorService);
                     executorService.execute(serverThread);
-
-                    // 해당 사용자에 대한 CarSocketThread 객체 생성 실행
-//                    executorService.execute(carSocketThread);
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -68,10 +62,5 @@ public class SocketServer2 {
             }
         });
     }
-
-    // CarSocketThread 객체에 접근할 수 있는 메서드
-//    public CarSocketThread getCarSocketThread(long clientId) {
-//        return userCarSocketThreads.get(clientId);
-//    }
 
 }

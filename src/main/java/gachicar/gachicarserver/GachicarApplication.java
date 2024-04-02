@@ -3,7 +3,7 @@ package gachicar.gachicarserver;
 import gachicar.gachicarserver.service.CarService;
 import gachicar.gachicarserver.service.DriveReportService;
 import gachicar.gachicarserver.service.UserService;
-import gachicar.gachicarserver.socket.SocketServer2;
+import gachicar.gachicarserver.socket.SocketServer;
 import io.undertow.Undertow;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
@@ -37,8 +37,8 @@ public class GachicarApplication {
 	}
 
 	@Bean
-	public SocketServer2 customSocketServer(ServerSocket serverSocket, ExecutorService executorService, UserService userService, DriveReportService driveReportService, CarService carService) {
-		SocketServer2 socketServer = new SocketServer2(serverSocket, executorService, userService, driveReportService, carService);
+	public SocketServer customSocketServer(ServerSocket serverSocket, ExecutorService executorService, UserService userService, DriveReportService driveReportService, CarService carService) {
+		SocketServer socketServer = new SocketServer(serverSocket, executorService, userService, driveReportService, carService);
 		socketServer.start();
 		return socketServer;
 	}
