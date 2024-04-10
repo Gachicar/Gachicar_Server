@@ -32,6 +32,7 @@
 - 주행 중에는 다른 그룹원들이 해당 차량 이용 불가
 - 주행이 종료되면 주행 리포트가 생성되고, 그룹원들은 공유 차량의 상태와 주행 리포트 리스트 조회 가능
 
+<a href="https://www.canva.com/design/DAF_43M3KCU/Qd9wdxWsG3B1X2TdIovoww/view?utm_content=DAF_43M3KCU&utm_campaign=designshare&utm_medium=link&utm_source=editor">👉 발표자료 보러 가기 </a>
 <br/>
 
 ## 📌 Architecture
